@@ -1,0 +1,93 @@
+# This file was automatically created by FeynRules 2.3.47
+# Mathematica version: 13.2.0 for Linux x86 (64-bit) (December 7, 2022)
+# Date: Thu 13 Apr 2023 07:46:47
+
+
+# 
+# This is the logfile for the model 2 neutral scalars, 4 coloured fermions with charge 2/3, 3 coloured fermions with charge -1/3 and 4 coloured scalars with non-specified charge for di-Higgs studies
+
+# Authors: L. Panizzi
+# Model version: 1.0
+# Checking the Quantum numbers
+   * Electric charge defined.
+# Checking the Lagrangians
+   * All Lagrangians are ok.
+#
+# Particle definitions
+#
+
+   * No particles removed. All particles correspond to GenInt setup.
+
+# Automatically assigned PDG numbers
+   * Assigned PDG number 9000001 to particle ghA
+   * Assigned PDG number 9000002 to particle ghZ
+   * Assigned PDG number 9000003 to particle ghWp
+   * Assigned PDG number 9000004 to particle ghWm
+
+
+# Compulsory PDG codes:
+   * Class SM leptons complete.
+   * Class SM neutrinos complete.
+   * Class SM quarks complete.
+   * Class SM gauge bosons complete.
+#
+# Parameter definitions
+#
+
+   * All parameters are ok.
+
+
+# Vertices
+   * Calling FeynmanRules for 1 Lagrangians.
+   * Number of classes vertices: 200
+   * Number of flavored vertices: 202
+   * Saved vertices in InterfaceRun[ 2 ].
+   * Checked QNumber conservation.
+      - Quantum number GhostNumber conserved in all vertices.
+      - Quantum number LeptonNumber conserved in all vertices.
+      - Quantum number Q conserved in all vertices.
+      - Quantum number Y conserved in all vertices.
+   * particles.py written.
+   * parameters.py written.
+#
+# Vertex definitions
+#
+
+   * 170 vertices written.
+   * vertices.py written.
+#
+# Lorentz structure definitions
+#
+
+   * 42 lorentz structures written.
+   * lorentz.py written.
+#
+# Coupling definitions
+#
+
+   * 111 couplings written.
+   * couplings.py written.
+#
+# Coupling order definitions
+#
+
+   * 0 couplings orders written.
+   * coupling_orders.py written.
+#
+# Decay definitions
+#
+
+   * 19 decays written.
+   * decay.py not written
+#
+# CTCoupling definitions
+#
+
+   * 593 CTcouplings written.
+   * CT_couplings.py written.
+#
+# CTVertex definitions
+#
+
+   * 291 CTvertices written.
+   * CT_vertices.py written.

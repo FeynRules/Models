@@ -1,0 +1,10 @@
+UFO model file for studying new physics contributions to di-Higgs production at hadron colliders using the deconstruction method 
+Refs.: Phys. Rev. D 107 (2023) no.11, 115010
+       Phys. Rev. D 112 (2025) no.5, 055005
+
+New-physics content:
+- 2 neutral scalars: s01,s02
+- 4 vector-like top partners: tp1,tp2,tp3,tp4
+- 3 vector-like bottom partners: bp1,bp2,bp3
+- 4 coloured scalars (no charge assigned): sq1, sq2, sq3, sq4
+- modified HHH, Htt and Hbb coupligns

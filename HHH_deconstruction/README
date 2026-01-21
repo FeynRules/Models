@@ -1,0 +1,10 @@
+UFO model for single, double and triple Higgs production with modified SM couplings at hadron colliders 
+using the deconstruction method in Ref. https://arxiv.org/abs/2512.03003
+
+The coupling orders associated to *additive* modifications to SM couplings are:
+
+HHH -> trilinear Higgs coupling
+HHHH -> quadrilinear Higgs coupling
+HTTMOD -> Higgs-top Yukawa coupling
+HBBMOD -> Higgs-bottom Yukawa coupling
+
