@@ -1,0 +1,203 @@
+(* ==================================================================
+   02_parameters_CP.fr  Ysc with CP phase 
+   ================================================================== *)
+
+scotoBaseParameters = If[ListQ[M$Parameters], M$Parameters, {}];
+
+scotoNewParameters = {
+
+  m2Eta == {
+    ParameterType    -> External,
+    ComplexParameter -> False,
+    BlockName        -> SCOTOINERT,
+    OrderBlock       -> 1,
+    Value            -> 22500.0,
+    Description      -> "Inert-doublet mass parameter"
+  },
+
+  lam2Eta == {
+    ParameterType    -> External,
+    ComplexParameter -> False,
+    BlockName        -> SCOTOINERT,
+    OrderBlock       -> 2,
+    Value            -> 0.10,
+    InteractionOrder -> {QED, 2},
+    Description      -> "Inert self-coupling lambda2"
+  },
+
+  YeN1 == {
+    ParameterType -> External, ComplexParameter -> False,
+    BlockName -> YSCOTO, OrderBlock -> 1,
+    Value -> 0.0001, InteractionOrder -> {NP, 1},
+    Description -> "electron-N1 Scotogenic Yukawa magnitude"
+  },
+
+  YeN2 == {
+    ParameterType -> External, ComplexParameter -> False,
+    BlockName -> YSCOTO, OrderBlock -> 2,
+    Value -> 0.0, InteractionOrder -> {NP, 1},
+    Description -> "electron-N2 Scotogenic Yukawa magnitude"
+  },
+
+  YeN3 == {
+    ParameterType -> External, ComplexParameter -> False,
+    BlockName -> YSCOTO, OrderBlock -> 3,
+    Value -> 0.0, InteractionOrder -> {NP, 1},
+    Description -> "electron-N3 Scotogenic Yukawa magnitude"
+  },
+
+  YmuN1 == {
+    ParameterType -> External, ComplexParameter -> False,
+    BlockName -> YSCOTO, OrderBlock -> 4,
+    Value -> 0.0, InteractionOrder -> {NP, 1},
+    Description -> "muon-N1 Scotogenic Yukawa magnitude"
+  },
+
+  YmuN2 == {
+    ParameterType -> External, ComplexParameter -> False,
+    BlockName -> YSCOTO, OrderBlock -> 5,
+    Value -> 0.0001, InteractionOrder -> {NP, 1},
+    Description -> "muon-N2 Scotogenic Yukawa magnitude"
+  },
+
+  YmuN3 == {
+    ParameterType -> External, ComplexParameter -> False,
+    BlockName -> YSCOTO, OrderBlock -> 6,
+    Value -> 0.0, InteractionOrder -> {NP, 1},
+    Description -> "muon-N3 Scotogenic Yukawa magnitude"
+  },
+
+  YtaN1 == {
+    ParameterType -> External, ComplexParameter -> False,
+    BlockName -> YSCOTO, OrderBlock -> 7,
+    Value -> 0.0, InteractionOrder -> {NP, 1},
+    Description -> "tau-N1 Scotogenic Yukawa magnitude"
+  },
+
+  YtaN2 == {
+    ParameterType -> External, ComplexParameter -> False,
+    BlockName -> YSCOTO, OrderBlock -> 8,
+    Value -> 0.0, InteractionOrder -> {NP, 1},
+    Description -> "tau-N2 Scotogenic Yukawa magnitude"
+  },
+
+  YtaN3 == {
+    ParameterType -> External, ComplexParameter -> False,
+    BlockName -> YSCOTO, OrderBlock -> 9,
+    Value -> 0.0001, InteractionOrder -> {NP, 1},
+    Description -> "tau-N3 Scotogenic Yukawa magnitude"
+  },
+
+  deN1 == {
+    ParameterType -> External, ComplexParameter -> False,
+    BlockName -> YSCOTOPHASE, OrderBlock -> 1,
+    Value -> 0.0,
+    Description -> "phase of electron-N1 Scotogenic Yukawa"
+  },
+
+  deN2 == {
+    ParameterType -> External, ComplexParameter -> False,
+    BlockName -> YSCOTOPHASE, OrderBlock -> 2,
+    Value -> 0.0,
+    Description -> "phase of electron-N2 Scotogenic Yukawa"
+  },
+
+  deN3 == {
+    ParameterType -> External, ComplexParameter -> False,
+    BlockName -> YSCOTOPHASE, OrderBlock -> 3,
+    Value -> 0.0,
+    Description -> "phase of electron-N3 Scotogenic Yukawa"
+  },
+
+  dmuN1 == {
+    ParameterType -> External, ComplexParameter -> False,
+    BlockName -> YSCOTOPHASE, OrderBlock -> 4,
+    Value -> 0.0,
+    Description -> "phase of muon-N1 Scotogenic Yukawa"
+  },
+
+  dmuN2 == {
+    ParameterType -> External, ComplexParameter -> False,
+    BlockName -> YSCOTOPHASE, OrderBlock -> 5,
+    Value -> 0.0,
+    Description -> "phase of muon-N2 Scotogenic Yukawa"
+  },
+
+  dmuN3 == {
+    ParameterType -> External, ComplexParameter -> False,
+    BlockName -> YSCOTOPHASE, OrderBlock -> 6,
+    Value -> 0.0,
+    Description -> "phase of muon-N3 Scotogenic Yukawa"
+  },
+
+  dtaN1 == {
+    ParameterType -> External, ComplexParameter -> False,
+    BlockName -> YSCOTOPHASE, OrderBlock -> 7,
+    Value -> 0.0,
+    Description -> "phase of tau-N1 Scotogenic Yukawa"
+  },
+
+  dtaN2 == {
+    ParameterType -> External, ComplexParameter -> False,
+    BlockName -> YSCOTOPHASE, OrderBlock -> 8,
+    Value -> 0.0,
+    Description -> "phase of tau-N2 Scotogenic Yukawa"
+  },
+
+  dtaN3 == {
+    ParameterType -> External, ComplexParameter -> False,
+    BlockName -> YSCOTOPHASE, OrderBlock -> 9,
+    Value -> 0.0,
+    Description -> "phase of tau-N3 Scotogenic Yukawa"
+  },
+
+  Ysc == {
+    ParameterType    -> Internal,
+    ComplexParameter -> True,
+    Indices          -> {Index[Generation], Index[ScotoGen]},
+    Value            -> {
+      Ysc[1,1] -> YeN1  * Exp[I*deN1],  Ysc[1,2] -> YeN2  * Exp[I*deN2],  Ysc[1,3] -> YeN3  * Exp[I*deN3],
+      Ysc[2,1] -> YmuN1 * Exp[I*dmuN1], Ysc[2,2] -> YmuN2 * Exp[I*dmuN2], Ysc[2,3] -> YmuN3 * Exp[I*dmuN3],
+      Ysc[3,1] -> YtaN1 * Exp[I*dtaN1], Ysc[3,2] -> YtaN2 * Exp[I*dtaN2], Ysc[3,3] -> YtaN3 * Exp[I*dtaN3]
+    },
+    InteractionOrder -> {NP, 1},
+    Description      -> "Scotogenic Yukawa matrix"
+  },
+
+  lam3Eta == {
+    ParameterType    -> Internal,
+    ComplexParameter -> False,
+    Value            -> 2*(Metap^2 - m2Eta)/vev^2,
+    InteractionOrder -> {QED, 2},
+    Description      -> "lambda3 derived from Metap and m2Eta"
+  },
+
+  lam4Eta == {
+    ParameterType    -> Internal,
+    ComplexParameter -> False,
+    Value            -> (MetaR^2 + MetaI^2 - 2*Metap^2)/vev^2,
+    InteractionOrder -> {QED, 2},
+    Description      -> "lambda4 derived from inert masses"
+  },
+
+  lam5Eta == {
+    ParameterType    -> Internal,
+    ComplexParameter -> False,
+    Value            -> (MetaR^2 - MetaI^2)/vev^2,
+    InteractionOrder -> {QED, 2},
+    Description      -> "lambda5 derived from the etaR/etaI mass splitting"
+  },
+
+  lambdaL == {
+    ParameterType    -> Internal,
+    ComplexParameter -> False,
+    Value            -> (lam3Eta + lam4Eta + lam5Eta)/2,
+    InteractionOrder -> {QED, 2},
+    Description      -> "Effective CP-even inert portal coupling"
+  }
+
+};
+
+M$Parameters = Join[scotoBaseParameters, scotoNewParameters];
+
+Clear[scotoBaseParameters, scotoNewParameters];
