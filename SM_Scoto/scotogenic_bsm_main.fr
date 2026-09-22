@@ -1,0 +1,24 @@
+(* ==================================================================
+   scotogenic_bsm_main.fr
+   ================================================================== *)
+
+M$ModelName = "SM_Scoto";
+M$Information = {
+  Authors      -> {"M. Boukidi", "R. Ruiz"},
+  Version      -> "1.0",
+  Date         -> "2026 September 21",
+  Institutions -> {"IFJ PAN"},
+  Emails       -> {"mboukidi@ifj.edu.pl, rruiz@ifj.edu.pl"},
+  References   -> {"Ma, PRD73 (2006) 077301 [arXiv:hep-ph/0601225]",
+                   "Boukidi, et al [arXiv:2609.xxxxxx]"},
+  URLs         -> {"https://gitlab.cern.ch/riruiz/public-projects/-/tree/master/ScotoLHC"}
+};
+
+$ScotoMainDir = DirectoryName[$InputFileName];
+Get[FileNameJoin[{$ScotoMainDir, "Parts", "00_model_info_indices.fr"}]];
+Get[FileNameJoin[{$ScotoMainDir, "Parts", "01_particles.fr"}]];
+Get[FileNameJoin[{$ScotoMainDir, "Parts", "02_parameters.fr"}]];
+Get[FileNameJoin[{$ScotoMainDir, "Parts", "03_lagrangian.fr"}]];
+Get[FileNameJoin[{$ScotoMainDir, "Parts", "04_assembly.fr"}]];
+
+Print["Standard Model + Scotogenic extension (SM_Scoto) loaded."];

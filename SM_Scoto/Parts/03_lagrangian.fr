@@ -1,0 +1,24 @@
+(* ==================================================================
+   03_lagrangian.fr
+   ================================================================== *)
+
+VInert := (
+    m2Eta * etabar[ii] * eta[ii]
+  + (lam2Eta/2) * etabar[ii] * eta[ii] * etabar[jj] * eta[jj]
+  + lam3Eta * Phibar[ii] * Phi[ii] * etabar[jj] * eta[jj]
+  + lam4Eta * Phibar[ii] * eta[ii] * etabar[jj] * Phi[jj]
+  + (lam5Eta/2) * Phibar[ii] * eta[ii] * Phibar[jj] * eta[jj]
+  + (lam5Eta/2) * etabar[ii] * Phi[ii] * etabar[jj] * Phi[jj]
+);
+
+LInertKinetic := DC[etabar[ii], mu] * DC[eta[ii], mu];
+LInert := LInertKinetic - VInert;
+
+LMajoranaKinetic := I/2 * NSbar.Ga[mu].del[NS, mu];
+LMajoranaMass    := -1/2 * MNS[kk] * NSbar[sp, kk] * NS[sp, kk];
+LMajorana        := LMajoranaKinetic + LMajoranaMass;
+
+LYScotBase :=
+  -Ysc[ff, kk] * LLbar[sp, ii, ff] * Eps[ii, jj] * etabar[jj] * NS[sp, kk];
+
+LScotYuk := LYScotBase + HC[LYScotBase];

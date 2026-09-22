@@ -1,0 +1,104 @@
+(* ==================================================================
+   01_particles.fr
+   ================================================================== *)
+
+scotoBaseClasses = If[ListQ[M$ClassesDescription], M$ClassesDescription, {}];
+
+ScotoZ2OddFields = {eta, etaR, etaI, etap, NS, N1, N2, N3};
+ScotoZ2Parity = {
+  eta -> -1, etaR -> -1, etaI -> -1, etap -> -1,
+  NS  -> -1, N1   -> -1, N2   -> -1, N3   -> -1
+};
+
+ScotoLeptonNumberConvention = {
+  eta  -> -1,
+  etap -> -1,
+  NS   -> 0, N1 -> 0, N2 -> 0, N3 -> 0
+};
+
+scotoNewClasses = {
+
+  S[20] == {
+    ClassName           -> eta,
+    Unphysical          -> True,
+    Indices             -> {Index[SU2D]},
+    FlavorIndex         -> SU2D,
+    SelfConjugate       -> False,
+    QuantumNumbers      -> {Y -> 1/2},
+    TeXParticleName     -> "\\eta",
+    TeXAntiParticleName -> "\\eta^\\dagger",
+    Definitions         -> {
+      eta[1] -> -I * etap,
+      eta[2] -> (etaR + I*etaI)/Sqrt[2]
+    }
+  },
+
+  S[21] == {
+    ClassName           -> etaR,
+    SelfConjugate       -> True,
+    Mass                -> {MetaR, 153.9886},
+    Width               -> {WetaR, 10.0},
+    PropagatorLabel     -> "etaR",
+    PropagatorType      -> D,
+    PropagatorArrow     -> None,
+    PDG                 -> 9900035,
+    ParticleName        -> "etaR",
+    TeXParticleName     -> "\\eta_R",
+    FullName            -> "CP-even inert scalar"
+  },
+
+  S[22] == {
+    ClassName           -> etaI,
+    SelfConjugate       -> True,
+    Mass                -> {MetaI, 155.9447},
+    Width               -> {WetaI, 10.0},
+    PropagatorLabel     -> "etaI",
+    PropagatorType      -> D,
+    PropagatorArrow     -> None,
+    PDG                 -> 9900036,
+    ParticleName        -> "etaI",
+    TeXParticleName     -> "\\eta_I",
+    FullName            -> "CP-odd inert scalar"
+  },
+
+  S[23] == {
+    ClassName           -> etap,
+    SelfConjugate       -> False,
+    QuantumNumbers      -> {Q -> 1},
+    Mass                -> {Metap, 159.7849},
+    Width               -> {WetaP, 10.0},
+    PropagatorLabel     -> "eta+",
+    PropagatorType      -> D,
+    PropagatorArrow     -> Forward,
+    PDG                 -> 9900037,
+    ParticleName        -> "eta+",
+    AntiParticleName    -> "eta-",
+    TeXParticleName     -> "\\eta^+",
+    TeXAntiParticleName -> "\\eta^-",
+    FullName            -> "Charged inert scalar"
+  },
+
+  F[20] == {
+    ClassName           -> NS,
+    ClassMembers        -> {N1, N2, N3},
+    Indices             -> {Index[ScotoGen]},
+    FlavorIndex         -> ScotoGen,
+    SelfConjugate       -> True,
+    Mass                -> {MNS, {MN1, 300.0}, {MN2, 500.0}, {MN3, 1000.0}},
+    Width               -> {WNS, {WN1, 6.3*^-8}, {WN2, 1.6*^-7}, {WN3, 3.8*^-7}},
+    PropagatorLabel     -> {"N", "N1", "N2", "N3"},
+    PropagatorType      -> Straight,
+    PropagatorArrow     -> None,
+    PDG                 -> {9900012, 9900014, 9900016},
+    ParticleName        -> {"n1", "n2", "n3"},
+    TeXParticleName     -> {"N_1", "N_2", "N_3"},
+    FullName            -> {"First singlet Majorana fermion",
+                            "Second singlet Majorana fermion",
+                            "Third singlet Majorana fermion"}
+  }
+
+};
+
+M$ClassesDescription = Join[scotoBaseClasses, scotoNewClasses];
+
+Clear[scotoBaseClasses, scotoNewClasses];

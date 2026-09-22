@@ -1,0 +1,147 @@
+# This file was automatically created by FeynRules 2.3.49
+# Mathematica version: 13.2.1 for Linux x86 (64-bit) (January 27, 2023)
+# Date: Mon 21 Sep 2026 20:49:28
+
+
+# 
+# This is the logfile for the model SM_Scoto
+
+# Authors: M. Boukidi, R. Ruiz
+# Model version: 1.0
+# Checking the Quantum numbers
+   * Electric charge defined.
+# Checking the Lagrangians
+   * All Lagrangians are ok.
+#
+# Particle definitions
+#
+
+   * No particles removed. All particles correspond to GenInt setup.
+
+# Automatically assigned PDG numbers
+   * Assigned PDG number 9000001 to particle ghA
+   * Assigned PDG number 9000002 to particle ghZ
+   * Assigned PDG number 9000003 to particle ghWp
+   * Assigned PDG number 9000004 to particle ghWm
+
+
+# Compulsory PDG codes:
+   * Class SM leptons complete.
+   * Class SM neutrinos complete.
+   * Class SM quarks complete.
+   * Class SM gauge bosons complete.
+#
+# Parameter definitions
+#
+
+   * All parameters are ok.
+
+
+# Vertices
+   * Calling FeynmanRules for 1 Lagrangians.
+   * Number of classes vertices: 241
+   * Number of flavored vertices: 241
+   * Saved vertices in InterfaceRun[ 1 ].
+   * Checked QNumber conservation.
+      - Quantum number GhostNumber conserved in all vertices.
+      - Quantum number LeptonNumber NOT conserved in the following vertices
+          {etap, N1, e}
+          {etap, N1, mu}
+          {etap, N2, e}
+          {etap, N2, mu}
+          {etap, N3, e}
+          {etap, N3, mu}
+          {etap, N1, ta}
+          {etap, N2, ta}
+          {etap, N3, ta}
+          {etaI, N1, ve}
+          {etaR, N1, ve}
+          {etaI, N2, ve}
+          {etaR, N2, ve}
+          {etaI, N3, ve}
+          {etaR, N3, ve}
+          {etaI, N1, vm}
+          {etaR, N1, vm}
+          {etaI, N2, vm}
+          {etaR, N2, vm}
+          {etaI, N3, vm}
+          {etaR, N3, vm}
+          {etaI, N1, vt}
+          {etaR, N1, vt}
+          {etaI, N2, vt}
+          {etaR, N2, vt}
+          {etaI, N3, vt}
+          {etaR, N3, vt}
+          {etapbar, ebar, N1}
+          {etaI, vebar, N1}
+          {etaR, vebar, N1}
+          {etapbar, ebar, N2}
+          {etaI, vebar, N2}
+          {etaR, vebar, N2}
+          {etapbar, ebar, N3}
+          {etaI, vebar, N3}
+          {etaR, vebar, N3}
+          {etapbar, mubar, N1}
+          {etaI, vmbar, N1}
+          {etaR, vmbar, N1}
+          {etapbar, mubar, N2}
+          {etaI, vmbar, N2}
+          {etaR, vmbar, N2}
+          {etapbar, mubar, N3}
+          {etaI, vmbar, N3}
+          {etaR, vmbar, N3}
+          {etapbar, tabar, N1}
+          {etaI, vtbar, N1}
+          {etaR, vtbar, N1}
+          {etapbar, tabar, N2}
+          {etaI, vtbar, N2}
+          {etaR, vtbar, N2}
+          {etapbar, tabar, N3}
+          {etaI, vtbar, N3}
+          {etaR, vtbar, N3}
+      - Quantum number Q conserved in all vertices.
+      - Quantum number Y conserved in all vertices.
+   * particles.py written.
+   * parameters.py written.
+#
+# Vertex definitions
+#
+
+   * 224 vertices written.
+   * vertices.py written.
+#
+# Lorentz structure definitions
+#
+
+   * 39 lorentz structures written.
+   * lorentz.py written.
+#
+# Coupling definitions
+#
+
+   * 132 couplings written.
+   * couplings.py written.
+#
+# Coupling order definitions
+#
+
+   * 0 couplings orders written.
+   * coupling_orders.py written.
+#
+# Decay definitions
+#
+
+   * 10 decays written.
+   * decay.py not written
+#
+# CTCoupling definitions
+#
+
+   * 116 CTcouplings written.
+   * CT_couplings.py written.
+#
+# CTVertex definitions
+#
+
+   * 79 CTvertices written.
+   * CT_vertices.py written.
