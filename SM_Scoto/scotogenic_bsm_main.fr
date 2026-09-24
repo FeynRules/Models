@@ -10,8 +10,9 @@ M$Information = {
   Institutions -> {"IFJ PAN"},
   Emails       -> {"mboukidi@ifj.edu.pl, rruiz@ifj.edu.pl"},
   References   -> {"Ma, PRD73 (2006) 077301 [arXiv:hep-ph/0601225]",
-                   "Boukidi, et al [arXiv:2609.xxxxxx]"},
-  URLs         -> {"https://gitlab.cern.ch/riruiz/public-projects/-/tree/master/ScotoLHC"}
+                   "Boukidi, Ramos, and Ruiz [arXiv:2609.26876]"},
+  URLs         -> {"https://github.com/FeynRules/Models/tree/main/SM_Scoto",
+                  "https://gitlab.cern.ch/riruiz/public-projects/-/tree/master/ScotoLHC"}
 };
 
 $ScotoMainDir = DirectoryName[$InputFileName];
