@@ -1,8 +1,8 @@
 # SM_Scoto UFO Libraries
 # M. Boukidi and R. Ruiz
 # September 2026
-# Boukidi, et al
-# Contact: rruiz@ifj.edu.pl, mboukidi@ifj.edu.pl
+# Mohammed Boukidi, Camila Ramos, and Richard Ruiz [arXiv:2609.26876]
+# Contact: mboukidi@ifj.edu.pl, camila.ramos@ifj.edu.pl, rruiz@ifj.edu.pl
 # URL: https://gitlab.cern.ch/riruiz/public-projects/-/tree/master/ScotoLHC/
 
 1. Synopsis: The SM_Scoto UFO libraries are a set 
@@ -13,7 +13,7 @@ in contemporary high energy software environments
 2. References: The UFO is based on the Scotogenic model by 
 - Ma, PRD73 (2006) 077301 [arXiv:hep-ph/0601225]
 as implemented in 
-- Boukidi, et al [arXiv:2609.xxxxxx]
+- Boukidi, Ramos, and Ruiz [arXiv:2609.2609.26876]
 Please also consider citing Alloul, et al
 - Comput.Phys.Commun.185:2250-2300,2014 (arXiv:1310.1921)
 - Comput.Phys.Commun.180:1614-1641,2009 (arXiv:0806.4194)
