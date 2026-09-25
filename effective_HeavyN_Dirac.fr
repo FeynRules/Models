@@ -1,0 +1,1957 @@
+(***************************************************************************************************************)
+(******       This is the FeynRules mod-file used for Majorana neutrinos in:                              ******)
+(******       GeV-scale neutrinos: interactions with mesons and DUNE sensitivity, arXiv:2007.03701        ******)
+(******                                                                                                   ******)
+(******       Authors: "P. Coloma", "E. Fernandez-Martinez", "M. Gonzalez-Lopez", "J. Hernandez-Garcia"   ******)
+(******                                                                                                   ******)
+(******       Note: Unitary gauge is assumed (FeynmanGauge = False)                                      ******)
+(******       since Feynman gauge is not supported in MadGraph.                                          ******)
+(***************************************************************************************************************)
+
+(* ************************** *)
+(* *****  Information   ***** *)
+(* ************************** *)
+M$ModelName = "effective_HeavyN_Dirac_v2026";
+
+M$Information = {
+  Authors      -> {"P. Coloma", "E. Fernandez-Martinez", "M. Gonzalez-Lopez", "J. Hernandez-Garcia"}, 
+  Version      -> "1.0.0",
+  Date         -> "06. 06. 2020",
+  Institutions -> {"Instituto de Fisica Corpuscular, Universidad de Valencia & CSIC, and Instituto de Fisica Teorica UAM/CSIC", "Departamento de Fisica Teorica & Instituto de Fisica Teorica, Universidad Autonoma de Madrid & CSIC", "Departamento de Fisica Teorica & Instituto de Fisica Teorica, Universidad Autonoma de Madrid & CSIC", "Institute for Theoretical Physics, ELTE Eotvos Lorand University"},
+  Emails       -> {"pilar.coloma@ift.csic.es", "enrique.fernandez-martinez@uam.es", "manuel.gonzalezl@uam.es", "josu.hernandez@ttk.elte.hu"},
+  URLs         -> "https://arxiv.org/abs/2007.03701"
+};
+
+FeynmanGauge = False;
+
+(* Add mesons and remove quarks from the Lagrangian. Change to False for a high-energy description in terms of quarks and without mesons. *)
+Mesons = True;
+
+(* ************************** *)
+(* ***** NLO Variables ****** *)
+(******************************)
+
+FR$LoopSwitches = {{Gf, MW}};
+FR$RmDblExt = { ymb -> MB, ymc -> MC, ymdo -> MD, yme -> Me, 
+   ymm -> MMU, yms -> MS, ymt -> MT, ymtau -> MTA, ymup -> MU, MN4 -> MassN4};
+
+
+(* ************************** *)
+(* *****      vevs      ***** *)
+(* ************************** *)
+M$vevs = { {Phi[2],vev} };
+
+(* ************************** *)
+(* *****  Gauge groups  ***** *)
+(* ************************** *)
+M$GaugeGroups = {
+  U1Y  == { 
+    Abelian          -> True,  
+    CouplingConstant -> g1, 
+    GaugeBoson       -> B, 
+    Charge           -> Y
+  },
+  SU2L == { 
+    Abelian           -> False, 
+    CouplingConstant  -> gw, 
+    GaugeBoson        -> Wi, 
+    StructureConstant -> Eps, 
+    Representations   -> {Ta,SU2D}, 
+    Definitions       -> {Ta[a_,b_,c_]->PauliSigma[a,b,c]/2, FSU2L[i_,j_,k_]:> I Eps[i,j,k]}
+  },
+  SU3C == { 
+    Abelian           -> False, 
+    CouplingConstant  -> gs, 
+    GaugeBoson        -> G,
+    StructureConstant -> f, 
+    Representations   -> {T,Colour}, 
+    SymmetricTensor   -> dSUN
+  } 
+};
+
+
+(* ************************** *)
+(* *****    Indices     ***** *)
+(* ************************** *)
+
+IndexRange[Index[SU2W      ]] = Unfold[Range[3]]; 
+IndexRange[Index[SU2D      ]] = Unfold[Range[2]];
+IndexRange[Index[Gluon     ]] = NoUnfold[Range[8]];
+IndexRange[Index[Colour    ]] = NoUnfold[Range[3]]; 
+IndexRange[Index[Generation]] = Range[3];
+IndexRange[Index[Neutrinos ]] = Range[4];
+IndexRange[Index[Heavynus  ]] = Range[1];
+
+
+IndexStyle[SU2W,       j];
+IndexStyle[SU2D,       k];
+IndexStyle[Gluon,      a];
+IndexStyle[Colour,     m];
+IndexStyle[Generation, f];
+IndexStyle[Neutrinos,  n];
+IndexStyle[Heavynus,   r];
+
+
+(* ************************** *)
+(* *** Interaction orders *** *)
+(* ***  (as used by mg5)  *** *)
+(* ************************** *)
+
+M$InteractionOrderHierarchy = {
+  {QCD, 1},
+  {QED, 2}
+};
+
+
+(* ************************** *)
+(* **** Particle classes **** *)
+(* ************************** *)
+M$ClassesDescription = {
+
+(* Gauge bosons: physical vector fields *)
+  V[1] == { 
+    ClassName       -> A, 
+    SelfConjugate   -> True,  
+    Mass            -> 0,  
+    Width           -> 0,  
+    ParticleName    -> "a", 
+    PDG             -> 22, 
+    PropagatorLabel -> "a", 
+    PropagatorType  -> W, 
+    PropagatorArrow -> None,
+    FullName        -> "Photon"
+  },
+  V[2] == { 
+    ClassName       -> Z, 
+    SelfConjugate   -> True,
+    Mass            -> {MZ, 91.1876},
+    Width           -> {WZ, 2.4952},
+    ParticleName    -> "Z", 
+    PDG             -> 23, 
+    PropagatorLabel -> "Z",
+    PropagatorType  -> Sine,
+    PropagatorArrow -> None,
+    FullName        -> "Z"
+  },
+  V[3] == {
+    ClassName        -> W,
+    SelfConjugate    -> False,
+    Mass             -> {MW, Internal},
+    Width            -> {WW, 2.085},
+    ParticleName     -> "W+",
+    AntiParticleName -> "W-",
+    QuantumNumbers   -> {Q -> 1},
+    PDG              -> 24, 
+    PropagatorLabel  -> "W",
+    PropagatorType   -> Sine,
+    PropagatorArrow  -> Forward,
+    FullName         -> "W"
+  },
+  V[4] == {
+    ClassName        -> G,
+    SelfConjugate    -> True,
+    Indices          -> {Index[Gluon]},
+    Mass             -> 0,
+    Width            -> 0,
+    ParticleName     -> "g", 
+    PDG              -> 21,
+    PropagatorLabel  -> "G",
+    PropagatorType   -> C,
+    PropagatorArrow  -> None,
+    FullName         -> "G"
+  },
+
+(* Ghosts: related to physical gauge bosons *)
+  U[1] == { 
+    ClassName       -> ghA, 
+    SelfConjugate   -> False,
+    Ghost           -> A,
+    QuantumNumbers  -> {GhostNumber -> 1},
+    Mass            -> 0,
+    Width	    -> 0,
+    PropagatorLabel -> "uA",
+    PropagatorType  -> GhostDash,
+    PropagatorArrow -> Forward
+  },
+  U[2] == {
+    ClassName       -> ghZ,
+    SelfConjugate   -> False,
+    Ghost           -> Z,
+    QuantumNumbers  -> {GhostNumber -> 1},
+    Mass            -> {MZ,91.1876},  
+    Width	    -> {WZ, 2.4952},
+    PropagatorLabel -> "uZ",
+    PropagatorType  -> GhostDash,
+    PropagatorArrow -> Forward
+  },
+  U[31] == { 
+    ClassName       -> ghWp,
+    SelfConjugate   -> False, 
+    Ghost           -> W,
+    QuantumNumbers  -> {GhostNumber -> 1, Q -> 1},
+    Mass            -> {MW,Internal}, 
+    Width           -> {WW, 2.085}, 
+    PropagatorLabel -> "uWp",
+    PropagatorType  -> GhostDash, 
+    PropagatorArrow -> Forward
+  },
+  U[32] == { 
+    ClassName       -> ghWm,
+    SelfConjugate   -> False, 
+    Ghost           -> Wbar,
+    QuantumNumbers  -> {GhostNumber -> 1, Q -> -1},
+    Mass            -> {MW,Internal}, 
+    Width           -> {WW, 2.085},
+    PropagatorLabel -> "uWm",
+    PropagatorType  -> GhostDash, 
+    PropagatorArrow -> Forward
+  },
+  U[4] == { 
+    ClassName       -> ghG, 
+    SelfConjugate   -> False,
+    Indices         -> {Index[Gluon]},
+    Ghost           -> G,
+    PDG             -> 82,
+    QuantumNumbers  ->{GhostNumber -> 1}, 
+    Mass            -> 0,
+    Width	    -> 0,
+    PropagatorLabel -> "uG",
+    PropagatorType  -> GhostDash,
+    PropagatorArrow -> Forward
+  },
+
+(* Gauge bosons: unphysical vector fields *)
+  V[11] == { 
+    ClassName     -> B, 
+    Unphysical    -> True, 
+    SelfConjugate -> True, 
+    Definitions   -> { B[mu_] -> -sw Z[mu]+cw A[mu]} 
+  },
+  V[12] == { 
+    ClassName     -> Wi,
+    Unphysical    -> True,
+    SelfConjugate -> True, 
+    Indices       -> {Index[SU2W]},
+    FlavorIndex   -> SU2W,
+    Definitions   -> { Wi[mu_,1] -> (Wbar[mu]+W[mu])/Sqrt[2], Wi[mu_,2] -> (Wbar[mu]-W[mu])/(I*Sqrt[2]), Wi[mu_,3] -> cw Z[mu] + sw A[mu]}
+  },
+
+(* Ghosts: related to unphysical gauge bosons *)
+  U[11] == {
+    ClassName     -> ghB, 
+    Unphysical    -> True,
+    SelfConjugate -> False,
+    Ghost         -> B, 
+    Definitions   -> { ghB -> -sw ghZ + cw ghA}
+  },
+  U[12] == {
+    ClassName     -> ghWi,
+    Unphysical    -> True,
+    SelfConjugate -> False,
+    Ghost         -> Wi,
+    Indices       -> {Index[SU2W]},
+    FlavorIndex   -> SU2W,
+    Definitions   -> { ghWi[1] -> (ghWp+ghWm)/Sqrt[2], ghWi[2] -> (ghWm-ghWp)/(I*Sqrt[2]), ghWi[3] -> cw ghZ+sw ghA}
+  } ,
+
+(* Fermions: physical fields *)
+(* Note that technically these are neutrino mass eigenstates and as such we gave them different labels and codes than to the flavour eigenstates. *) 
+  F[1] == {
+    ClassName        -> vl,
+    ClassMembers     -> {v1,v2,v3,N4},
+    Indices          -> {Index[Neutrinos]},
+    FlavorIndex      -> Neutrinos,
+    SelfConjugate    -> False,
+    Mass             -> {Mnu, 0,0,0, {MassN4, Internal}},
+    Width            -> {0, 0, 0, {WN, 0.00001}},
+    QuantumNumbers   -> {LeptonNumber -> 1},
+    PropagatorLabel  -> {"v", "v1", "v2", "v3","N4"} ,
+    PropagatorType   -> S,
+    PropagatorArrow  -> Forward,
+    PDG              -> {12000,14000,16000,18000},
+    ParticleName     -> {"v1","v2","v3","N4"},
+    AntiParticleName -> {"v1~","v2~","v3~","N4~"},
+    FullName         -> {"neutrino1", "neutrino2", "neutrino3","Heavy-neutrino"}
+  },
+
+  F[2] == {
+    ClassName        -> l,
+    ClassMembers     -> {e, mu, ta},
+    Indices          -> {Index[Generation]},
+    FlavorIndex      -> Generation,
+    SelfConjugate    -> False,
+    Mass             -> {Ml, {Me,5.11*^-4}, {MMU,0.10566}, {MTA,1.777}},
+    Width            -> 0,
+    QuantumNumbers   -> {Q -> -1, LeptonNumber -> 1},
+    PropagatorLabel  -> {"l", "e", "mu", "ta"},
+    PropagatorType   -> Straight,
+    PropagatorArrow  -> Forward,
+    PDG              -> {11, 13, 15},
+    ParticleName     -> {"e-", "mu-", "ta-"},
+    AntiParticleName -> {"e+", "mu+", "ta+"},
+    FullName         -> {"Electron", "Muon", "Tau"} 
+  },
+  F[3] == {
+    ClassName        -> uq,
+    ClassMembers     -> {u, c, t},
+    Indices          -> {Index[Generation], Index[Colour]},
+    FlavorIndex      -> Generation,
+    SelfConjugate    -> False,
+    Mass             -> {Mu, {MU, 2.55*^-3}, {MC,1.27}, {MT,172}},
+    Width            -> {0, 0, {WT,1.50833649}},
+    QuantumNumbers   -> {Q -> 2/3},
+    PropagatorLabel  -> {"uq", "u", "c", "t"},
+    PropagatorType   -> Straight,
+    PropagatorArrow  -> Forward,
+    PDG              -> {2, 4, 6}, 
+    ParticleName     -> {"u",  "c",  "t" },
+    AntiParticleName -> {"u~", "c~", "t~"},
+    FullName         -> {"u-quark", "c-quark", "t-quark"}
+  },
+  F[4] == {
+    ClassName        -> dq,
+    ClassMembers     -> {d, s, b},
+    Indices          -> {Index[Generation], Index[Colour]},
+    FlavorIndex      -> Generation,
+    SelfConjugate    -> False,
+    Mass             -> {Md, {MD,5.04*^-3}, {MS,0.101}, {MB,4.7}},
+    Width            -> 0,
+    QuantumNumbers   -> {Q -> -1/3},
+    PropagatorLabel  -> {"dq", "d", "s", "b"},
+    PropagatorType   -> Straight, 
+    PropagatorArrow  -> Forward,
+    PDG              -> {1,3,5},
+    ParticleName     -> {"d",  "s",  "b" },
+    AntiParticleName -> {"d~", "s~", "b~"},
+    FullName         -> {"d-quark", "s-quark", "b-quark"}
+  },
+
+(* Fermions: unphysical fields *)
+  F[11] == { 
+    ClassName      -> LL, 
+    Unphysical     -> True, 
+    Indices        -> {Index[SU2D], Index[Generation]},
+    FlavorIndex    -> SU2D,
+    SelfConjugate  -> False,
+    QuantumNumbers -> {Y -> -1/2},
+    Definitions    -> { LL[sp1_,1,ff_] :> Module[{sp2,ff2}, PMNS[ff,ff2] ProjM[sp1,sp2] vl[sp2,ff2]], LL[sp1_,2,ff_] :> Module[{sp2}, ProjM[sp1,sp2] l[sp2,ff]] }
+  },
+  F[12] == { 
+    ClassName      -> lR, 
+    Unphysical     -> True, 
+    Indices        -> {Index[Generation]},
+    FlavorIndex    -> Generation,
+    SelfConjugate  -> False,
+    QuantumNumbers -> {Y -> -1},
+    Definitions    -> { lR[sp1_,ff_] :> Module[{sp2}, ProjP[sp1,sp2] l[sp2,ff]] }
+  },
+  F[13] == { 
+    ClassName      -> QL, 
+    Unphysical     -> True, 
+    Indices        -> {Index[SU2D], Index[Generation], Index[Colour]},
+    FlavorIndex    -> SU2D,
+    SelfConjugate  -> False,
+    QuantumNumbers -> {Y -> 1/6},
+    Definitions    -> { 
+      QL[sp1_,1,ff_,cc_] :> Module[{sp2}, ProjM[sp1,sp2] uq[sp2,ff,cc]], 
+      QL[sp1_,2,ff_,cc_] :> Module[{sp2,ff2}, CKM[ff,ff2] ProjM[sp1,sp2] dq[sp2,ff2,cc]] }
+  },
+  F[14] == { 
+    ClassName      -> uR, 
+    Unphysical     -> True, 
+    Indices        -> {Index[Generation], Index[Colour]},
+    FlavorIndex    -> Generation,
+    SelfConjugate  -> False,
+    QuantumNumbers -> {Y -> 2/3},
+    Definitions    -> { uR[sp1_,ff_,cc_] :> Module[{sp2}, ProjP[sp1,sp2] uq[sp2,ff,cc]] }
+  },
+  F[15] == { 
+    ClassName      -> dR, 
+    Unphysical     -> True, 
+    Indices        -> {Index[Generation], Index[Colour]},
+    FlavorIndex    -> Generation,
+    SelfConjugate  -> False,
+    QuantumNumbers -> {Y -> -1/3},
+    Definitions    -> { dR[sp1_,ff_,cc_] :> Module[{sp2}, ProjP[sp1,sp2] dq[sp2,ff,cc]] }
+  },
+  F[16] == { 
+    ClassName      -> NR, 
+    Unphysical     -> True, 
+    Indices        -> {Index[Heavynus]},
+    FlavorIndex    -> Heavynus,
+    SelfConjugate  -> False,
+    Definitions    -> { NR[sp1_,ff_] :> Module[{sp2,ff2}, HEAVR[ff,ff2] ProjP[sp1,sp2] vl[sp2,ff2]] }
+  },
+  F[17] == { 
+    ClassName      -> NL, 
+    Unphysical     -> True, 
+    Indices        -> {Index[Heavynus]},
+    FlavorIndex    -> Heavynus,
+    SelfConjugate  -> False,
+    Definitions    -> { NL[sp1_,ff_] :> Module[{sp2,ff2}, HEAV[ff,ff2] ProjM[sp1,sp2] vl[sp2,ff2]] }
+  },
+
+
+(* Higgs: physical scalars  *)
+  S[1] == {
+    ClassName       -> H,
+    SelfConjugate   -> True,
+    Mass            -> {MH,125.1},
+    Width           -> {WH,0.00407},
+    PropagatorLabel -> "H",
+    PropagatorType  -> D,
+    PropagatorArrow -> None,
+    PDG             -> 25,
+    ParticleName    -> "H",
+    FullName        -> "H"
+  },
+
+(* Higgs: physical scalars  *)
+  S[2] == {
+    ClassName       -> G0,
+    SelfConjugate   -> True,
+    Goldstone       -> Z,
+    Mass            -> {MZ, 91.1876},
+    Width           -> {WZ, 2.4952},
+    PropagatorLabel -> "Go",
+    PropagatorType  -> D,
+    PropagatorArrow -> None,
+    PDG             -> 250,
+    ParticleName    -> "G0",
+    FullName        -> "G0"
+  },
+  S[3] == {
+    ClassName        -> GP,
+    SelfConjugate    -> False,
+    Goldstone        -> W,
+    Mass             -> {MW, Internal},
+    QuantumNumbers   -> {Q -> 1},
+    Width            -> {WW, 2.085},
+    PropagatorLabel  -> "GP",
+    PropagatorType   -> D,
+    PropagatorArrow  -> None,
+    PDG              -> 251,
+    ParticleName     -> "G+",
+    AntiParticleName -> "G-",
+    FullName         -> "GP"
+  },
+
+
+(* Pseudoscalar mesons  *)
+  S[4] == {
+    ClassName       -> K,
+    SelfConjugate   -> False,
+    Mass            -> {MK,0.493677},
+    QuantumNumbers   -> {Q -> 1},
+    Width           -> {WK,0}, 
+    PropagatorLabel -> "K",
+    PropagatorType  -> D,
+    PropagatorArrow -> None,
+    PDG             -> 321,
+    ParticleName    -> "K+",
+    AntiParticleName -> "K-",
+    FullName        -> "Charged Kaon"
+  },
+
+  S[5] == {
+    ClassName       -> Pip,
+    SelfConjugate   -> False,
+    Mass            -> {MPip,0.13957},
+    QuantumNumbers   -> {Q -> 1},
+    Width           -> {WPip, 0}, 
+    PropagatorLabel -> "Pi",
+    PropagatorType  -> D,
+    PropagatorArrow -> None,
+    PDG             -> 211,
+    ParticleName    -> "Pi+",
+    AntiParticleName -> "Pi-",
+    FullName        -> "Charged Pion"
+  },
+
+  S[6] == {
+    ClassName       -> Dd,
+    SelfConjugate   -> False,
+    Mass            -> {MDd,1.869},
+    QuantumNumbers   -> {Q -> 1},
+    Width           -> {WD, 0}, 
+    PropagatorLabel -> "Dd",
+    PropagatorType  -> D,
+    PropagatorArrow -> None,
+    PDG             -> 411,
+    ParticleName    -> "D+",
+    AntiParticleName -> "D-",
+    FullName        -> "Charged D"
+  },
+
+  S[13] == {
+    ClassName       -> D0,
+    SelfConjugate   -> False,
+    Mass            -> {MD0,1.865},
+    QuantumNumbers   -> {Q -> 0},
+    Width           -> {WD0,0}, 
+    PropagatorLabel -> "D0",
+    PropagatorType  -> D,
+    PropagatorArrow -> None,
+    PDG             -> 421,
+    ParticleName    -> "D0",
+    AntiParticleName -> "D0bar",
+    FullName        -> "Neutral D"
+  },
+
+  S[7] == {
+    ClassName       -> Pi0,
+    SelfConjugate   -> True,
+    Mass            -> {MPi0,0.13498},
+    Width           -> {WPi0, 0}, 
+    PropagatorLabel -> "Pi0",
+    PropagatorType  -> D,
+    PropagatorArrow -> None,
+    PDG             -> 111,
+    ParticleName    -> "Pi0",
+    FullName        -> "Neutral Pion"
+  },
+
+  S[12] == {
+    ClassName       -> K0,
+    SelfConjugate   -> False,
+    Mass            -> {MK0,0.497611},
+    QuantumNumbers   -> {Q -> 0},
+    Width           -> {WK0,0}, 
+    PropagatorLabel -> "K0",
+    PropagatorType  -> D,
+    PropagatorArrow -> None,
+    PDG             -> 311,
+    ParticleName    -> "K0",
+    AntiParticleName -> "K0bar",
+    FullName        -> "Neutral Kaon"
+  },
+
+  S[8] == {
+    ClassName       -> Eta,
+    SelfConjugate   -> True,
+    Mass            -> {Meta,0.54786},
+    Width           -> {Weta, 0}, 
+    PropagatorLabel -> "eta",
+    PropagatorType  -> D,
+    PropagatorArrow -> None,
+    PDG             -> 221,
+    ParticleName    -> "Eta",
+    FullName        -> "Eta"
+  },
+
+  S[9] == {
+    ClassName       -> Etap,
+    SelfConjugate   -> True,
+    Mass            -> {Metap,0.9578},
+    Width           -> {Wetap, 0}, 
+    PropagatorLabel -> "etap",
+    PropagatorType  -> D,
+    PropagatorArrow -> None,
+    PDG             -> 331,
+    ParticleName    -> "Etap",
+    FullName        -> "Eta Prime"
+  },
+
+  S[10] == {
+    ClassName       -> Ds,
+    SelfConjugate   -> False,
+    Mass            -> {MDs,1.9683},
+    QuantumNumbers   -> {Q -> 1},
+    Width           -> {WDs, 0}, 
+    PropagatorLabel -> "Ds",
+    PropagatorType  -> D,
+    PropagatorArrow -> None,
+    PDG             -> 431,
+    ParticleName    -> "Ds+",
+    AntiParticleName -> "Ds-",
+    FullName        -> "Charged Ds"
+  },
+
+  S[15] == {
+    ClassName       -> Bu,
+    SelfConjugate   -> False,
+    Mass            -> {MBu,5.279},
+    QuantumNumbers  -> {Q -> 1},
+    Width           -> {WBu, 0}, 
+    PropagatorLabel -> "Bu",
+    PropagatorType  -> D,
+    PropagatorArrow -> None,
+    PDG             -> 521,
+    ParticleName    -> "B+",
+    AntiParticleName -> "B-",
+    FullName        -> "Charged B"
+  },
+
+  S[16] == {
+    ClassName       -> Bc,
+    SelfConjugate   -> False,
+    Mass            -> {MBc,6.275},
+    QuantumNumbers  -> {Q -> 1},
+    Width           -> {WBc, 0}, 
+    PropagatorLabel -> "Bc",
+    PropagatorType  -> D,
+    PropagatorArrow -> None,
+    PDG             -> 541,
+    ParticleName    -> "Bc+",
+    AntiParticleName -> "Bc-",
+    FullName        -> "Charged Bc"
+  },
+
+  S[17] == {
+    ClassName       -> B0,
+    SelfConjugate   -> False,
+    Mass            -> {MB0,5.280},
+    QuantumNumbers  -> {Q -> 0},
+    Width           -> {WB0,0}, 
+    PropagatorLabel -> "B0",
+    PropagatorType  -> D,
+    PropagatorArrow -> None,
+    PDG             -> 511,
+    ParticleName    -> "B0",
+    AntiParticleName -> "B0bar",
+    FullName        -> "Neutral B"
+  },
+
+  S[18] == {
+    ClassName       -> B0s,
+    SelfConjugate   -> False,
+    Mass            -> {MB0s,5.367},
+    QuantumNumbers  -> {Q -> 0},
+    Width           -> {WB0s,0}, 
+    PropagatorLabel -> "B0s",
+    PropagatorType  -> D,
+    PropagatorArrow -> None,
+    PDG             -> 531,
+    ParticleName    -> "B0s",
+    AntiParticleName -> "B0sbar",
+    FullName        -> "Neutral Bs"
+  },
+
+(* Higgs: unphysical scalars  *)
+  S[11] == { 
+    ClassName      -> Phi, 
+    Unphysical     -> True, 
+    Indices        -> {Index[SU2D]},
+    FlavorIndex    -> SU2D,
+    SelfConjugate  -> False,
+    QuantumNumbers -> {Y -> 1/2},
+    Definitions    -> { Phi[1] -> -I GP, Phi[2] -> (vev + H + I G0)/Sqrt[2]  }
+  },
+
+(* Vector mesons *)
+
+
+  V[21] == { 
+    ClassName       -> rho0, 
+    SelfConjugate   -> True,
+    Mass            -> {Mrho0, 0.77526},
+    Width           -> {Wrho0, 0.1478}, 
+    ParticleName    -> "rho0", 
+    PDG             -> 113, 
+    PropagatorLabel -> "rho0",
+    PropagatorType  -> Sine,
+    PropagatorArrow -> None,
+    FullName        -> "rho 0"
+  },
+
+  V[22] == {
+    ClassName        -> rho,
+    SelfConjugate    -> False,
+    Mass             -> {Mrho, 0.77511},
+    Width            -> {Wrho, 0.1491}, 
+    ParticleName     -> "rho+",
+    AntiParticleName -> "rho-",
+    QuantumNumbers   -> {Q -> 1},
+    PDG              -> 213, 
+    PropagatorLabel  -> "rho",
+    PropagatorType   -> Sine,
+    PropagatorArrow  -> Forward,
+    FullName         -> "charged rho"
+  },
+
+
+  V[23] == { 
+    ClassName       -> omega, 
+    SelfConjugate   -> True,
+    Mass            -> {Mom, 0.78265},
+    Width           -> {Wom, 0.00849}, 
+    ParticleName    -> "omega", 
+    PDG             -> 223, 
+    PropagatorLabel -> "omega",
+    PropagatorType  -> Sine,
+    PropagatorArrow -> None,
+    FullName        -> "Omega"
+  },
+
+  V[24] == { 
+    ClassName       -> Kstar, 
+    SelfConjugate   -> False,
+    Mass            -> {MKstar, 0.8917},
+    Width           -> {WKstar, 0.0508}, 
+    ParticleName    -> "Kstar+", 
+    AntiParticleName -> "Kstar-",
+    QuantumNumbers   -> {Q -> 1},
+    PDG             -> 323, 
+    PropagatorLabel -> "Kstar",
+    PropagatorType  -> Sine,
+    PropagatorArrow -> Forward,
+    FullName        -> "Charged Kstar"
+  },
+
+    V[25] == { 
+    ClassName       -> phimeson, 
+    SelfConjugate   -> True,
+    Mass            -> {Mphi, 1.019461},
+    Width           -> {Wphi, 0.004249}, 
+    ParticleName    -> "phimeson",
+    PDG             -> 333, 
+    PropagatorLabel -> "phi",
+    PropagatorType  -> Sine,
+    PropagatorArrow -> Forward,
+    FullName        -> "phi meson"
+  },
+
+    V[26] == { 
+    ClassName       -> Bstar, 
+    SelfConjugate   -> False,
+    Mass            -> {MBstar, 5.3247},
+    Width           -> {WBstar, 0}, 
+    ParticleName    -> "Bstar+", 
+    AntiParticleName -> "Bstar-",
+    QuantumNumbers   -> {Q -> 1},
+    PDG             -> 523, 
+    PropagatorLabel -> "Bstar",
+    PropagatorType  -> Sine,
+    PropagatorArrow -> Forward,
+    FullName        -> "Charged Bstar"
+  }
+
+};
+
+
+
+(* ************************** *)
+(* *****     Gauge      ***** *)
+(* *****   Parameters   ***** *)
+(* *****   (FeynArts)   ***** *)
+(* ************************** *)
+
+GaugeXi[ V[1]  ] = GaugeXi[A];
+GaugeXi[ V[2]  ] = GaugeXi[Z];
+GaugeXi[ V[3]  ] = GaugeXi[W];
+GaugeXi[ V[4]  ] = GaugeXi[G];
+GaugeXi[ S[1]  ] = 1;
+GaugeXi[ S[2]  ] = GaugeXi[Z];
+GaugeXi[ S[3]  ] = GaugeXi[W];
+GaugeXi[ U[1]  ] = GaugeXi[A];
+GaugeXi[ U[2]  ] = GaugeXi[Z];
+GaugeXi[ U[31] ] = GaugeXi[W];
+GaugeXi[ U[32] ] = GaugeXi[W];
+GaugeXi[ U[4]  ] = GaugeXi[G];
+
+
+(* ************************** *)
+(* *****   Parameters   ***** *)
+(* ************************** *)
+M$Parameters = {
+
+  (* External parameters *)
+  aEWM1 == { 
+    ParameterType    -> External, 
+    BlockName        -> SMINPUTS, 
+    OrderBlock       -> 1, 
+    Value            -> 127.9,
+    InteractionOrder -> {QED,-2},
+    Description      -> "Inverse of the EW coupling constant at the Z pole"
+  },
+  Gf == {
+    ParameterType    -> External,
+    BlockName        -> SMINPUTS,
+    OrderBlock       -> 2,
+    Value            -> 1.16637*^-5, 
+    InteractionOrder -> {QED,2},
+    TeX              -> Subscript[G,f],
+    Description      -> "Fermi constant"
+  },
+  aS    == { 
+    ParameterType    -> External,
+    BlockName        -> SMINPUTS,
+    OrderBlock       -> 3,
+    Value            -> 0.1184, 
+    InteractionOrder -> {QCD,2},
+    TeX              -> Subscript[\[Alpha],s],
+    Description      -> "Strong coupling constant at the Z pole"
+  },
+  ymdo == {
+    ParameterType -> External,
+    BlockName     -> YUKAWA,
+    OrderBlock    -> 1,
+    Value         -> 5.04*^-3,
+    Description   -> "Down Yukawa mass"
+  },
+  ymup == {
+    ParameterType -> External,
+    BlockName     -> YUKAWA,
+    OrderBlock    -> 2,
+    Value         -> 2.55*^-3,
+    Description   -> "Up Yukawa mass"
+  },
+  yms == {
+    ParameterType -> External,
+    BlockName     -> YUKAWA,
+    OrderBlock    -> 3,
+    Value         -> 0.101,
+    Description   -> "Strange Yukawa mass"
+  },
+  ymc == {
+    ParameterType -> External,
+    BlockName     -> YUKAWA,
+    OrderBlock    -> 4,
+    Value         -> 1.27,
+    Description   -> "Charm Yukawa mass"
+  },
+  ymb == {
+    ParameterType -> External,
+    BlockName     -> YUKAWA,
+    OrderBlock    -> 5,
+    Value         -> 4.7,
+    Description   -> "Bottom Yukawa mass"
+  },
+  ymt == {
+    ParameterType -> External,
+    BlockName     -> YUKAWA,
+    OrderBlock    -> 6,
+    Value         -> 172,
+    Description   -> "Top Yukawa mass"
+  },
+  yme == {
+    ParameterType -> External,
+    BlockName     -> YUKAWA,
+    OrderBlock    -> 11,
+    Value         -> 5.11*^-4,
+    Description   -> "Electron Yukawa mass"
+  },
+  ymm == {
+    ParameterType -> External,
+    BlockName     -> YUKAWA,
+    OrderBlock    -> 13,
+    Value         -> 0.10566,
+    Description   -> "Muon Yukawa mass"
+  },
+  ymtau == {
+    ParameterType -> External,
+    BlockName     -> YUKAWA,
+    OrderBlock    -> 15,
+    Value         -> 1.777,
+    Description   -> "Tau Yukawa mass"
+  },
+  modthetae == {
+    ParameterType -> External,
+    BlockName     -> YUKAWA,
+    OrderBlock    -> 16,
+    Value         -> 0.00001,
+    Description   -> "Heavy-nu-electron mixing modulus"
+  },
+   argthetae == {
+    ParameterType -> External,
+    BlockName     -> YUKAWA,
+    OrderBlock    -> 17,
+    Value         -> 0,
+    Description   -> "Heavy-nu-electron mixing argument (degrees)"
+  },
+  thetae == {
+    ParameterType -> Internal,
+    BlockName     -> YUKAWA,
+    Value         -> modthetae*Exp[I*Pi/180*argthetae],
+    Description   -> "Heavy-nu-electron mixing"
+  },
+   modthetamu == {
+    ParameterType -> External,
+    BlockName     -> YUKAWA,
+    OrderBlock    -> 18,
+    Value         -> 0.00001,
+    Description   -> "Heavy-nu-muon mixing modulus"
+  },
+   argthetamu == {
+    ParameterType -> External,
+    BlockName     -> YUKAWA,
+    OrderBlock    -> 19,
+    Value         -> 0,
+    Description   -> "Heavy-nu-muon mixing argument (degrees)"
+  },
+  thetamu == {
+    ParameterType -> Internal,
+    BlockName     -> YUKAWA,
+    Value         -> modthetamu*Exp[I*Pi/180*argthetamu],
+    Description   -> "Heavy-nu-muon mixing"
+  },
+  modthetatau == {
+    ParameterType -> External,
+    BlockName     -> YUKAWA,
+    OrderBlock    -> 20,
+    Value         -> 0.00001,
+    Description   -> "Heavy-nu-tau mixing modulus"
+  },
+   argthetatau == {
+    ParameterType -> External,
+    BlockName     -> YUKAWA,
+    OrderBlock    -> 21,
+    Value         -> 0,
+    Description   -> "Heavy-nu-tau mixing argument (degrees)"
+  },
+  thetatau == {
+    ParameterType -> Internal,
+    BlockName     -> YUKAWA,
+    Value         -> modthetatau*Exp[I*Pi/180*argthetatau],
+    Description   -> "Heavy-nu-tau mixing"
+  },
+  MN4 == {
+    ParameterType -> External,
+    BlockName     -> YUKAWA,
+    OrderBlock    -> 22,
+    Value         -> 1.0,
+    Description   -> "Majorana mass for N4 in GeV"
+  },
+
+  cabi == {
+    ParameterType -> External,
+    BlockName     -> CKMBLOCK,
+    OrderBlock    -> 1,
+    Value         -> 0.227736,
+    TeX           -> Subscript[\[Theta], c],
+    Description   -> "Cabibbo angle"
+  },
+
+  th13 == {
+    ParameterType -> External,
+    ComplexParameter -> False,
+    BlockName     -> CKMBLOCK,
+    OrderBlock    -> 2,
+    Value         -> 0.003508,
+    TeX           -> Subscript[\[Theta], 13],
+    Description   -> "CKM Theta 13"
+  },
+
+  th23 == {
+    ParameterType -> External,
+    ComplexParameter -> False,
+    BlockName     -> CKMBLOCK,
+    OrderBlock    -> 3,
+    Value         -> 0.041539,
+    TeX           -> Subscript[\[Theta], 23],
+    Description   -> "CKM theta 23"
+  },
+
+  del13 == {
+    ParameterType -> External,
+    ComplexParameter -> False,
+    BlockName     -> CKMBLOCK,
+    OrderBlock    -> 4,
+    Value         -> 1.20,
+    TeX           -> Subscript[\[Delta], 13],
+    Description   -> "CKM delta 13"
+  },
+
+  MassN4 == {
+    ParameterType -> Internal,
+    Value         -> MN4,
+    Description   -> "Heavy mass"
+  },
+
+  fK == {
+    ParameterType -> External,
+    BlockName     -> MESONBLOCK,
+    OrderBlock    -> 2,
+    Value         -> 0.1556,
+    Description   -> "Kaon decay constant"
+  },
+
+  fpi == {
+    ParameterType -> External,
+    BlockName     -> MESONBLOCK,
+    OrderBlock    -> 3,
+    Value         -> 0.1302,
+    Description   -> "Pion decay constant"
+  },
+
+  feta == {
+    ParameterType -> External,
+    BlockName     -> MESONBLOCK,
+    OrderBlock    -> 4,
+    Value         -> 0.08159,
+    Description   -> "Eta decay constant"
+  },
+
+  fetap == {
+    ParameterType -> External,
+    BlockName     -> MESONBLOCK,
+    OrderBlock    -> 5,
+    Value         -> -0.0946,
+    Description   -> "Eta prime decay constant"
+  },
+
+  fD == {
+    ParameterType -> External,
+    BlockName     -> MESONBLOCK,
+    OrderBlock    -> 6,
+    Value         -> 0.212,
+    Description   -> "D decay constant"
+  },
+
+  frho == {
+    ParameterType -> External,
+    BlockName     -> MESONBLOCK,
+    OrderBlock    -> 7,
+    Value         -> 0.17,
+    Description   -> "rho decay constant"
+  },
+
+  fKstar == {
+    ParameterType -> External,
+    BlockName     -> MESONBLOCK,
+    OrderBlock    -> 34,
+    Value         -> 0.177,
+    Description   -> "Kstar decay constant"
+  },
+
+  fDs == {
+    ParameterType -> External,
+    BlockName     -> MESONBLOCK,
+    OrderBlock    -> 8,
+    Value         -> 0.249,
+    Description   -> "Ds decay constant"
+  },
+
+  fomega == {
+    ParameterType -> External,
+    BlockName     -> MESONBLOCK,
+    OrderBlock    -> 9,
+    Value         -> 0.155,
+    Description   -> "omega decay constant"
+  },
+
+  fphi == {
+    ParameterType -> External,
+    BlockName     -> MESONBLOCK,
+    OrderBlock    -> 10,
+    Value         -> 0.232,
+    Description   -> "phi decay constant"
+  },
+
+  fB == {
+    ParameterType -> External,
+    BlockName     -> MESONBLOCK,
+    OrderBlock    -> 11,
+    Value         -> 0.190,
+    ComplexParameter -> False,
+    Description   -> "B decay constant"
+  },
+
+  fBs == {
+    ParameterType -> External,
+    BlockName     -> MESONBLOCK,
+    OrderBlock    -> 12,
+    Value         -> 0.230,
+    ComplexParameter -> False,
+    Description   -> "Bs decay constant"
+  },
+
+  fBc == {
+    ParameterType -> External,
+    BlockName     -> MESONBLOCK,
+    OrderBlock    -> 13,
+    Value         -> 0.190,
+    ComplexParameter -> False,
+    Description   -> "Bc decay constant"
+  },
+
+
+  (* Internal Parameters *)
+  aEW == {
+    ParameterType    -> Internal,
+    Value            -> 1/aEWM1,
+    InteractionOrder -> {QED,2},
+    TeX              -> Subscript[\[Alpha], EW],
+    Description      -> "Electroweak coupling contant"
+  },
+  MW == { 
+    ParameterType -> Internal, 
+    Value         -> Sqrt[MZ^2/2+Sqrt[MZ^4/4-3.14/Sqrt[2]*aEW/Gf*MZ^2]], 
+    TeX           -> Subscript[M,W], 
+    Description   -> "W mass"
+  },
+  sw2 == { 
+    ParameterType -> Internal, 
+    Value         -> 1-(MW/MZ)^2, 
+    Description   -> "Squared Sin of the Weinberg angle"
+  },
+  ee == { 
+    ParameterType    -> Internal, 
+    Value            -> Sqrt[4 3.14 aEW], 
+    InteractionOrder -> {QED,1}, 
+    TeX              -> e,  
+    Description      -> "Electric coupling constant"
+  },
+  cw == { 
+    ParameterType -> Internal, 
+    Value         -> Sqrt[1-sw2], 
+    TeX           -> Subscript[c,w], 
+    Description   -> "Cosine of the Weinberg angle"
+  },
+  sw == { 
+    ParameterType -> Internal, 
+    Value         -> Sqrt[sw2], 
+    TeX           -> Subscript[s,w], 
+    Description   -> "Sine of the Weinberg angle"
+  },
+  gw == { 
+    ParameterType    -> Internal, 
+    Definitions      -> {gw->ee/sw}, 
+    InteractionOrder -> {QED,1},  
+    TeX              -> Subscript[g,w], 
+    Description      -> "Weak coupling constant at the Z pole"
+  },
+  g1 == { 
+    ParameterType    -> Internal, 
+    Definitions      -> {g1->ee/cw}, 
+    InteractionOrder -> {QED,1},  
+    TeX              -> Subscript[g,1], 
+    Description      -> "U(1)Y coupling constant at the Z pole"
+  },
+  gs == { 
+    ParameterType    -> Internal, 
+    Value            -> Sqrt[4 3.14 aS],
+    InteractionOrder -> {QCD,1},  
+    TeX              -> Subscript[g,s], 
+    ParameterName    -> G,
+    Description      -> "Strong coupling constant at the Z pole"
+  },
+  vev == {
+    ParameterType    -> Internal,
+    Value            -> 2*MW*sw/ee, 
+    InteractionOrder -> {QED,-1},
+    Description      -> "Higgs vacuum expectation value"
+  },
+  lam == {
+    ParameterType    -> Internal,
+    Value            -> MH^2/(2*vev^2),
+    InteractionOrder -> {QED, 2},
+    Description      -> "Higgs quartic coupling"
+  },
+  muH == {
+    ParameterType -> Internal,
+    Value         -> Sqrt[vev^2 lam],
+    TeX           -> \[Mu],
+    Description   -> "Coefficient of the quadratic piece of the Higgs potential"
+  },
+  thetatot == {
+    ParameterType -> Internal,
+    Value         -> Sqrt[thetae*Conjugate[thetae]+thetamu*Conjugate[thetamu]+thetatau*Conjugate[thetatau]],
+    TeX           -> \[Theta],
+    Description   -> "Heavy-active mixing"
+  },
+  thetas == {
+    ParameterType -> Internal,
+    Value         -> thetae+thetamu+thetatau,
+    TeX           -> Subscript[\[Theta],s],
+    Description   -> "Heavy-active mixing sum"
+  },
+  r == {
+    ParameterType -> Internal,
+    Value         -> Sqrt[1+thetatot^2],
+    Description   -> "useful ratio"
+  },
+  yN == {
+    ParameterType    -> Internal,
+    Indices          -> {Index[Generation], Index[Heavynus]},
+    Value            -> {yN[1,1] -> Sqrt[2] Conjugate[thetae] MN4 /vev, yN[2,1] -> Sqrt[2] Conjugate[thetamu] MN4 /vev, yN[3,1] -> Sqrt[2] Conjugate[thetatau] MN4 /vev},
+    InteractionOrder -> {QED, 1},
+    ParameterName    -> {yN[1,1] -> yNe, yN[2,1] -> yNmu, yN[3,1] -> yNtau},
+    TeX              -> Superscript[y, N],
+    Description      -> "Heavy nu Yukawa couplings"
+  },
+  numass == {
+    ParameterType    -> Internal,
+    Indices          -> {Index[Neutrinos], Index[Neutrinos]},
+    Value            -> {numass[4,4] :> MN4, numass[ii_,jj_] :> 0},
+    InteractionOrder -> {QED, 0},
+    ParameterName    -> {numass[1,1] :> mnu1, numass[2,2] :> mnu2, numass[3,3] :> mnu3, numass[4,4] :> mnu4},
+    TeX              -> Superscript[m, nu],
+    Description      -> "Neutrino mass"
+  }, 
+  
+  (** Form factors for K0 to Pi+ decays: linear parametrization **) 
+
+  avq2K0Pi == {
+    ParameterType -> Internal,
+    Indices       -> {Index[Neutrinos], Index[Generation]},
+    Value         -> {avq2K0Pi[ii_,ll_] ->
+    If[ll==1, -1.7232*numass[ii,ii]^3 + 1.08186*numass[ii,ii]^2 + 0.0973741*numass[ii,ii] + 0.0331474*KroneckerDelta[ii,ii], 
+    If[ll==2, -3.15565*numass[ii,ii]^3 + 1.70749*numass[ii,ii]^2 + 0.0668773*numass[ii,ii] + 0.052815*KroneckerDelta[ii,ii], 10^-90]]},
+    Description   -> "Average momentum transfer in K0 to Pi decays"
+  }, 
+
+  fplusK0Pi == {
+    ParameterType -> Internal,
+    Indices     -> {Index[Neutrinos], Index[Generation]},
+    Value         -> {fplusK0Pi[ii_,ll_] -> 0.9749*(1+0.0282*avq2K0Pi[ii,ll]/MPip^2)},
+    Description   -> "Average f+ form factor in K0 to Pi+ decays"
+  },
+
+  f0K0Pi == {
+    ParameterType -> Internal,
+    Indices       -> {Index[Neutrinos], Index[Generation]},
+    Value         -> {f0K0Pi[ii_,ll_] -> 0.9749*(1+0.0138*avq2K0Pi[ii,ll]/MPip^2)},
+    Description   -> "Average f0 form factor in K0 to Pi+ decays"
+  },
+
+  fminusK0Pi == {
+    ParameterType -> Internal,
+    Indices       -> {Index[Neutrinos], Index[Generation]},
+    Value         -> {fminusK0Pi[ii_,ll_] -> (MPip^2-MK0^2)*(f0K0Pi[ii,ll]-fplusK0Pi[ii,ll])/avq2K0Pi[ii,ll]},
+    Description   -> "Average f- form factor in K0 to Pi+ decays"
+  },  
+
+(** Form factors for K+ to Pi0 decays: linear parametrization **) 
+
+ avq2KPi0 == { 
+    ParameterType -> Internal,
+    Indices       -> {Index[Neutrinos], Index[Generation]},
+    Value         -> {avq2KPi0[ii_,ll_] ->
+    If[ll==1, -1.80782*numass[ii,ii]^3 + 1.10701*numass[ii,ii]^2 + 0.0998414*numass[ii,ii] + 0.0329829*KroneckerDelta[ii,ii], 
+    If[ll==2, -3.22495*numass[ii,ii]^3 + 1.71265*numass[ii,ii]^2 + 0.0698265*numass[ii,ii] + 0.052995*KroneckerDelta[ii,ii], 10^-90]]},
+    Description   -> "Average momentum transfer in K+ to Pi0 decays"
+  }, 
+
+  fplusKPi0 == {
+    ParameterType -> Internal,
+    Indices     -> {Index[Neutrinos], Index[Generation]},
+    Value         -> {fplusKPi0[ii_,ll_] -> 0.9749*(1+0.0297*avq2KPi0[ii,ll]/MPip^2)},
+    Description   -> "Average f+ form factor in K+ to Pi0 decays"
+  }, 
+
+  f0KPi0 == {
+    ParameterType -> Internal,
+    Indices       -> {Index[Neutrinos], Index[Generation]},
+    Value         -> {f0KPi0[ii_,ll_] -> 0.9749*(1+0.0195*avq2KPi0[ii,ll]/MPip^2)},
+    Description   -> "Average f0 form factor in K+ to Pi0 decays"
+  },
+
+  fminusKPi0 == {
+    ParameterType -> Internal,
+    Indices       -> {Index[Neutrinos], Index[Generation]},
+    Value         -> {fminusKPi0[ii_,ll_] -> (MPi0^2-MK^2)*(f0KPi0[ii,ll]-fplusKPi0[ii,ll])/avq2KPi0[ii,ll]},
+    Description   -> "Average f- form factor in K+ to Pi0 decays"
+  }, 
+
+(** Form factors for D to K decays: pole parametrization **) 
+
+  avq2DK == { 
+    ParameterType -> Internal,
+    Indices       -> {Index[Neutrinos], Index[Generation]},
+    Value         -> {avq2DK[ii_,ll_] -> 
+    If[ll==1, -0.364268*numass[ii,ii]^3 + 0.932086*numass[ii,ii]^2 + 0.381641*numass[ii,ii] + 0.538848*KroneckerDelta[ii,ii], 
+    If[ll==2, -0.337128*numass[ii,ii]^3 + 0.94568*numass[ii,ii]^2 + 0.368498*numass[ii,ii] + 0.568881*KroneckerDelta[ii,ii], 10^-90]]},
+    Description   -> "Average momentum transfer in D to K decays" 
+  }, 
+
+  tplusDK == {
+    ParameterType -> Internal,
+    Value         -> (MDd+MK)^2,
+    Description   -> "t+ factor in the pole parametrization"
+  }, 
+
+  t0DK == {
+    ParameterType -> Internal,
+    Value         -> (MDd+MK)*(Sqrt[MK]-Sqrt[MDd])^2,
+    Description   -> "t0 factor in the pole parametrization"
+  },
+
+  zDK == {
+    ParameterType -> Internal,
+    Indices       -> {Index[Neutrinos], Index[Generation]},
+    Value         -> {zDK[ii_,ll_] -> (Sqrt[tplusDK-avq2DK[ii,ll]]-Sqrt[tplusDK-t0DK])/(Sqrt[tplusDK-avq2DK[ii,ll]]+Sqrt[tplusDK-t0DK])},
+    Description   -> "z factor in the pole parametrization"
+  },
+
+  z0DK == {
+    ParameterType -> Internal,
+    Value         -> (Sqrt[tplusDK]-Sqrt[tplusDK-t0DK])/(Sqrt[tplusDK]+Sqrt[tplusDK-t0DK]),
+    Description   -> "z0 factor in the pole parametrization"
+  },
+ 
+  fplusDK == {
+    ParameterType -> Internal,
+    Indices       -> {Index[Neutrinos], Index[Generation]},
+    Value         -> {fplusDK[ii_,ll_] -> (0.7647-0.066*(zDK[ii,ll]-z0DK)*(1+0.5*(zDK[ii,ll]+z0DK)))/(1-0.22*avq2DK[ii,ll])},
+    Description   -> "Average f+ form factor in D to K decays"
+  },
+
+  f0DK == { 
+    ParameterType -> Internal,
+    Indices     -> {Index[Neutrinos], Index[Generation]},
+    Value         -> {f0DK[ii_,ll_] -> (0.7647-2.084*(zDK[ii,ll]-z0DK)*(1+0.5*(zDK[ii,ll]+z0DK)))},
+    Description   -> "Average f0 form factor in D to K decays"
+  },
+
+  fminusDK == { 
+    ParameterType -> Internal,
+    Indices       -> {Index[Neutrinos], Index[Generation]},
+    Value         -> {fminusDK[ii_,ll_] -> (MK^2-MDd^2)/avq2DK[ii,ll]*(f0DK[ii,ll]-fplusDK[ii,ll])},
+    Description   -> "Average f- form factor in D to K decays"
+  },
+
+(** Form factors for B+ to Pi0 decays: FLAG review **)
+
+  avq2BPi0 == {
+    ParameterType -> Internal,
+    Indices       -> {Index[Neutrinos], Index[Generation]},
+    Value         -> {avq2BPi0[ii_,ll_] -> 
+    If[ll==1, -0.0747182*numass[ii,ii]^3 + 0.757551*numass[ii,ii]^2 + 1.43992*numass[ii,ii] + 9.05607*KroneckerDelta[ii,ii], 
+    If[ll==2, -0.0692688*numass[ii,ii]^3 + 0.731411*numass[ii,ii]^2 + 1.47166*numass[ii,ii] + 9.08105*KroneckerDelta[ii,ii], 
+    If[ll==3, -0.163478*numass[ii,ii]^3 + 1.45186*numass[ii,ii]^2 + 0.790463*numass[ii,ii] + 13.5051*KroneckerDelta[ii,ii],10^-90]]]},
+    Description   -> "Average momentum transfer in B+ to Pi0 decays"
+  },
+
+  tplusBPi0 == {
+    ParameterType -> Internal,
+    Value         -> (MBu + MPi0)^2,
+    Description   -> "t+ factor"
+  },
+
+  t0BPi0 == {
+    ParameterType -> Internal,
+    Value         -> (MBu + MPi0)*(Sqrt[MPi0]-Sqrt[MBu])^2,
+    Description   -> "t0 factor"
+  },
+
+  zBPi0 == {
+    ParameterType -> Internal,
+    Indices       -> {Index[Neutrinos], Index[Generation]},
+    Value         -> {zBPi0[ii_,ll_] -> (Sqrt[tplusBPi0-avq2BPi0[ii,ll]]-Sqrt[tplusBPi0-t0BPi0])/(Sqrt[tplusBPi0-avq2BPi0[ii,ll]]+Sqrt[tplusBPi0-t0BPi0])},
+    Description   -> "z factor"
+  },
+
+  z0BPi0 == {
+    ParameterType -> Internal,
+    Value         -> (Sqrt[tplusBPi0]-Sqrt[tplusBPi0-t0BPi0])/(Sqrt[tplusBPi0]+Sqrt[tplusBPi0-t0BPi0]),
+    Description   -> "z0 factor"
+  },
+
+  fplusBPi0 == {
+    ParameterType -> Internal,
+    Indices       -> {Index[Neutrinos], Index[Generation]},
+    Value         -> {fplusBPi0[ii_,ll_] -> (1/(1-avq2BPi0[ii,ll]/MBstar^2))*(-0.68*(zBPi0[ii,ll]-1/3(zBPi0[ii,ll]^3))-0.86*((zBPi0[ii,ll]^3)2/3 + zBPi0[ii,ll]^2) + 0.404)},
+    Description   -> "Average f+ form factor in B+ to Pi0 decays"
+  },
+
+  f0BPi0 == { 
+    ParameterType -> Internal,
+    Indices     -> {Index[Neutrinos], Index[Generation]},
+    Value         -> {f0BPi0[ii_,ll_] -> (1.2527548*zBPi0[ii,ll]^2 - 1.61*zBPi0[ii,ll] + 0.490)},
+    Description   -> "Average f0 form factor in B+ to Pi0 decays"
+  },
+
+  fminusBPi0 == {
+    ParameterType -> Internal,
+    Indices       -> {Index[Neutrinos], Index[Generation]},
+    Value         -> {fminusBPi0[ii_,ll_] -> (MPi0^2-MBu^2)/avq2BPi0[ii,ll]*(f0BPi0[ii,ll]-fplusBPi0[ii,ll])},
+    Description   -> "Average f- form factor in B+ to Pi0 decays"
+  },
+
+(** Form factors for B0 to Pi+ decays: FLAG review **)
+
+  avq2B0Pi == {
+    ParameterType -> Internal,
+    Indices       -> {Index[Neutrinos], Index[Generation]},
+    Value         -> {avq2B0Pi[ii_,ll_] -> 
+    If[ll==1, -0.0738527*numass[ii,ii]^3 + 0.750683*numass[ii,ii]^2 + 1.45882*numass[ii,ii] + 9.01069*KroneckerDelta[ii,ii], 
+    If[ll==2, -0.0695186*numass[ii,ii]^3 + 0.731836*numass[ii,ii]^2 + 1.47827*numass[ii,ii] + 9.0398*KroneckerDelta[ii,ii], 
+    If[ll==3, -0.164163*numass[ii,ii]^3 + 1.45367*numass[ii,ii]^2 + 0.794287*numass[ii,ii] + 13.4752*KroneckerDelta[ii,ii], 10^-90]]]},
+    Description   -> "Average momentum transfer in B0 to Pi+ decays"
+  },
+
+  tplusB0Pi == {
+    ParameterType -> Internal,
+    Value         -> (MB0 + MPip)^2,
+    Description   -> "t+ factor"
+  },
+
+  t0B0Pi == {
+    ParameterType -> Internal,
+    Value         -> (MB0 + MPip)*(Sqrt[MPip]-Sqrt[MB0])^2,
+    Description   -> "t0 factor"
+  },
+
+  zB0Pi == {
+    ParameterType -> Internal,
+    Indices       -> {Index[Neutrinos], Index[Generation]},
+    Value         -> {zB0Pi[ii_,ll_] -> (Sqrt[tplusB0Pi-avq2B0Pi[ii,ll]]-Sqrt[tplusB0Pi-t0B0Pi])/(Sqrt[tplusB0Pi-avq2B0Pi[ii,ll]]+Sqrt[tplusB0Pi-t0B0Pi])},
+    Description   -> "z factor"
+  },
+
+  z0B0Pi == {
+    ParameterType -> Internal,
+    Value         -> (Sqrt[tplusB0Pi]-Sqrt[tplusB0Pi-t0B0Pi])/(Sqrt[tplusB0Pi]+Sqrt[tplusB0Pi-t0B0Pi]),
+    Description   -> "z0 factor"
+  },
+
+  fplusB0Pi == {
+    ParameterType -> Internal,
+    Indices       -> {Index[Neutrinos], Index[Generation]},
+    Value         -> {fplusB0Pi[ii_,ll_] -> (1/(1-avq2B0Pi[ii,ll]/MBstar^2))*(-0.68*(zB0Pi[ii,ll]-zB0Pi[ii,ll]^3/3)-0.86*((2 zB0Pi[ii,ll]^3)/3 + zB0Pi[ii,ll]^2) + 0.404)},
+    Description   -> "Average f+ form factor in B0 to Pi+ decays"
+  },
+
+  f0B0Pi == { 
+    ParameterType -> Internal,
+    Indices     -> {Index[Neutrinos], Index[Generation]},
+    Value         -> {f0B0Pi[ii_,ll_] -> (1.268691923*zB0Pi[ii,ll]^2 - 1.61*zB0Pi[ii,ll] + 0.490)},
+    Description   -> "Average f0 form factor in B0 to Pi+ decays"
+  },
+
+  fminusB0Pi == {
+    ParameterType -> Internal,
+    Indices       -> {Index[Neutrinos], Index[Generation]},
+    Value         -> {fminusB0Pi[ii_,ll_] -> (MPip^2-MB0^2)/avq2B0Pi[ii,ll]*(f0B0Pi[ii,ll]-fplusB0Pi[ii,ll])},
+    Description   -> "Average f- form factor in B0 to Pi+ decays"
+  },
+
+  (** Form factors for B+ to D0 decays: FLAG review **)
+
+  avq2BD0 == {
+    ParameterType -> Internal,
+    Indices       -> {Index[Neutrinos], Index[Generation]},
+    Value         -> {avq2BD0[ii_,ll_] -> 
+    If[ll==1, -0.0756751*numass[ii,ii]^3 + 0.619874*numass[ii,ii]^2 + 1.06348*numass[ii,ii] + 3.82403*KroneckerDelta[ii,ii], 
+    If[ll==2, -0.0614*numass[ii,ii]^3 + 0.580972*numass[ii,ii]^2 + 1.08624*numass[ii,ii] + 3.85694*KroneckerDelta[ii,ii], 
+    If[ll==3, -0.49004*numass[ii,ii]^3 + 2.19813*numass[ii,ii]^2 + 0.420447*numass[ii,ii] + 7.22909*KroneckerDelta[ii,ii],10^-90]]]},
+    Description   -> "Average momentum transfer in B+ to D0 decays"
+  },
+
+  tplusBD0 == {
+    ParameterType -> Internal,
+    Value         -> (MBu + MD0)^2,
+    Description   -> "t+ factor"
+  },
+
+  t0BD0 == {
+    ParameterType -> Internal,
+    Value         -> (MBu + MD0)*(Sqrt[MD0]-Sqrt[MBu])^2,
+    Description   -> "t0 factor"
+  },
+
+  zBD0 == {
+    ParameterType -> Internal,
+    Indices       -> {Index[Neutrinos], Index[Generation]},
+    Value         -> {zBD0[ii_,ll_] -> (Sqrt[tplusBD0-avq2BD0[ii,ll]]-Sqrt[tplusBD0-t0BD0])/(Sqrt[tplusBD0-avq2BD0[ii,ll]]+Sqrt[tplusBD0-t0BD0])},
+    Description   -> "z factor"
+  },
+
+  z0BD0 == {
+    ParameterType -> Internal,
+    Value         -> (Sqrt[tplusBD0]-Sqrt[tplusBD0-t0BD0])/(Sqrt[tplusBD0]+Sqrt[tplusBD0-t0BD0]),
+    Description   -> "z0 factor"
+  },
+
+  fplusBD0 == {
+    ParameterType -> Internal,
+    Indices       -> {Index[Neutrinos], Index[Generation]},
+    Value         -> {fplusBD0[ii_,ll_] -> (1/(1-avq2BD0[ii,ll]/MBstar^2))*(-7.11*(zBD0[ii,ll]-1/3(zBD0[ii,ll]^3)) + 66*((zBD0[ii,ll]^3)2/3 + zBD0[ii,ll]^2) + 0.909)},
+    Description   -> "Average f+ form factor in B+ to D0 decays"
+  },
+
+  f0BD0 == { 
+    ParameterType -> Internal,
+    Indices     -> {Index[Neutrinos], Index[Generation]},
+    Value         -> {f0BD0[ii_,ll_] -> (33.2166*zBD0[ii,ll]^2 - 2.45*zBD0[ii,ll] + 0.794)},
+    Description   -> "Average f0 form factor in B+ to D0 decays"
+  },
+
+  fminusBD0 == {
+    ParameterType -> Internal,
+    Indices       -> {Index[Neutrinos], Index[Generation]},
+    Value         -> {fminusBD0[ii_,ll_] -> (MD0^2-MBu^2)/avq2BD0[ii,ll]*(f0BD0[ii,ll]-fplusBD0[ii,ll])},
+    Description   -> "Average f- form factor in B+ to D0 decays"
+  },
+
+  (** Form factors for B0 to D+ decays: FLAG review **)
+
+  avq2B0D == {
+    ParameterType -> Internal,
+    Indices       -> {Index[Neutrinos], Index[Generation]},
+    Value         -> {avq2B0D[ii_,ll_] -> 
+    If[ll==1, -0.0759024*numass[ii,ii]^3 + 0.620479*numass[ii,ii]^2 + 1.06255*numass[ii,ii] + 3.81359*KroneckerDelta[ii,ii], 
+    If[ll==2, -0.0616034*numass[ii,ii]^3 + 0.58158*numass[ii,ii]^2 + 1.08525*numass[ii,ii] + 3.84654*KroneckerDelta[ii,ii], 
+    If[ll==3, -0.492883*numass[ii,ii]^3 + 2.20311*numass[ii,ii]^2 + 0.419677*numass[ii,ii] + 7.2176*KroneckerDelta[ii,ii],10^-90]]]},
+    Description   -> "Average momentum transfer in B0 to D+ decays"
+  },
+
+  tplusB0D == {
+    ParameterType -> Internal,
+    Value         -> (MB0 + MDd)^2,
+    Description   -> "t+ factor"
+  },
+
+  t0B0D == {
+    ParameterType -> Internal,
+    Value         -> (MB0 + MDd)*(Sqrt[MDd]-Sqrt[MB0])^2,
+    Description   -> "t0 factor"
+  },
+
+  zB0D == {
+    ParameterType -> Internal,
+    Indices       -> {Index[Neutrinos], Index[Generation]},
+    Value         -> {zB0D[ii_,ll_] -> (Sqrt[tplusB0D-avq2B0D[ii,ll]]-Sqrt[tplusB0D-t0B0D])/(Sqrt[tplusB0D-avq2B0D[ii,ll]]+Sqrt[tplusB0D-t0B0D])},
+    Description   -> "z factor"
+  },
+
+  z0B0D == {
+    ParameterType -> Internal,
+    Value         -> (Sqrt[tplusB0D]-Sqrt[tplusB0D-t0B0D])/(Sqrt[tplusB0D]+Sqrt[tplusB0D-t0B0D]),
+    Description   -> "z0 factor"
+  },
+
+  fplusB0D == {
+    ParameterType -> Internal,
+    Indices       -> {Index[Neutrinos], Index[Generation]},
+    Value         -> {fplusB0D[ii_,ll_] -> (1/(1-avq2B0D[ii,ll]/MBstar^2))*(-7.11*(zB0D[ii,ll]-1/3(zB0D[ii,ll]^3)) + 66*((zB0D[ii,ll]^3)2/3 + zB0D[ii,ll]^2) + 0.909)},
+    Description   -> "Average f+ form factor in B0 to D+ decays"
+  },
+
+  f0B0D == { 
+    ParameterType -> Internal,
+    Indices     -> {Index[Neutrinos], Index[Generation]},
+    Value         -> {f0B0D[ii_,ll_] -> (33.5115*zB0D[ii,ll]^2 - 2.45*zB0D[ii,ll] + 0.794)},
+    Description   -> "Average f0 form factor in B0 to D+ decays"
+  },
+
+  fminusB0D == {
+    ParameterType -> Internal,
+    Indices       -> {Index[Neutrinos], Index[Generation]},
+    Value         -> {fminusB0D[ii_,ll_] -> (MDd^2-MB0^2)/avq2B0D[ii,ll]*(f0B0D[ii,ll]-fplusB0D[ii,ll])},
+    Description   -> "Average f- form factor in B0 to D+ decays"
+  },
+
+  (** Form factors for B0s to Ds+ decays: FLAG review **)
+
+  avq2B0sDs == {
+    ParameterType -> Internal,
+    Indices       -> {Index[Neutrinos], Index[Generation]},
+    Value         -> {avq2B0sDs[ii_,ll_] -> 
+    If[ll==1, -0.0767788*numass[ii,ii]^3 + 0.621995*numass[ii,ii]^2 + 1.06724*numass[ii,ii] + 3.76534*KroneckerDelta[ii,ii], 
+    If[ll==2, -0.0624231*numass[ii,ii]^3 + 0.583268*numass[ii,ii]^2 + 1.08928*numass[ii,ii] + 3.79888*KroneckerDelta[ii,ii], 
+    If[ll==3, -0.505219*numass[ii,ii]^3 + 2.2248*numass[ii,ii]^2 + 0.418473*numass[ii,ii] + 7.17705*KroneckerDelta[ii,ii],10^-90]]]},
+    Description   -> "Average momentum transfer in B0s to Ds+ decays"
+  },
+
+  tplusB0sDs == {
+    ParameterType -> Internal,
+    Value         -> (MB0s + MDs)^2,
+    Description   -> "t+ factor"
+  },
+
+  t0B0sDs == {
+    ParameterType -> Internal,
+    Value         -> (MB0s + MDs)*(Sqrt[MDs]-Sqrt[MB0s])^2,
+    Description   -> "t0 factor"
+  },
+
+  zB0sDs == {
+    ParameterType -> Internal,
+    Indices       -> {Index[Neutrinos], Index[Generation]},
+    Value         -> {zB0sDs[ii_,ll_] -> (Sqrt[tplusB0sDs-avq2B0sDs[ii,ll]]-Sqrt[tplusB0sDs-t0B0sDs])/(Sqrt[tplusB0sDs-avq2B0sDs[ii,ll]]+Sqrt[tplusB0sDs-t0B0sDs])},
+    Description   -> "z factor"
+  },
+
+  z0B0sDs == {
+    ParameterType -> Internal,
+    Value         -> (Sqrt[tplusB0sDs]-Sqrt[tplusB0sDs-t0B0sDs])/(Sqrt[tplusB0sDs]+Sqrt[tplusB0sDs-t0B0sDs]),
+    Description   -> "z0 factor"
+  },
+
+  fplusB0sDs == {
+    ParameterType -> Internal,
+    Indices       -> {Index[Neutrinos], Index[Generation]},
+    Value         -> {fplusB0sDs[ii_,ll_] -> (1/(1-avq2B0sDs[ii,ll]/MBstar^2))*(-7.11*(zB0sDs[ii,ll]-1/3(zB0sDs[ii,ll]^3)) + 66*((zB0sDs[ii,ll]^3)2/3 + zB0sDs[ii,ll]^2) + 0.909)},
+    Description   -> "Average f+ form factor in B0s to Ds+ decays"
+  },
+
+  f0B0sDs == { 
+    ParameterType -> Internal,
+    Indices     -> {Index[Neutrinos], Index[Generation]},
+    Value         -> {f0B0sDs[ii_,ll_] -> (39.1988*zB0sDs[ii,ll]^2 - 2.45*zB0sDs[ii,ll] + 0.794)},
+    Description   -> "Average f0 form factor in B0s to Ds+ decays"
+  },
+
+  fminusB0sDs == {
+    ParameterType -> Internal,
+    Indices       -> {Index[Neutrinos], Index[Generation]},
+    Value         -> {fminusB0sDs[ii_,ll_] -> (MDs^2-MB0s^2)/avq2B0sDs[ii,ll]*(f0B0sDs[ii,ll]-fplusB0sDs[ii,ll])},
+    Description   -> "Average f- form factor in B0s to Ds+ decays"
+  },
+
+    (** Form factors for B0s to K+ decays: FLAG review **)
+
+  avq2B0sK == {
+    ParameterType -> Internal,
+    Indices       -> {Index[Neutrinos], Index[Generation]},
+    Value         -> {avq2B0sK[ii_,ll_] -> 
+    If[ll==1, -0.0305836*numass[ii,ii]^3 + 0.431928*numass[ii,ii]^2 + 1.84666*numass[ii,ii] + 7.82438*KroneckerDelta[ii,ii], 
+    If[ll==2, -0.0223321*numass[ii,ii]^3 + 0.3961*numass[ii,ii]^2 + 1.87998*numass[ii,ii] + 7.86105*KroneckerDelta[ii,ii], 
+    If[ll==3, -0.111798*numass[ii,ii]^3 + 1.23898*numass[ii,ii]^2 + 0.905063*numass[ii,ii] + 12.2134*KroneckerDelta[ii,ii],10^-90]]]},
+    Description   -> "Average momentum transfer in B0s to K+ decays"
+  },
+
+  tplusB0sK == {
+    ParameterType -> Internal,
+    Value         -> (MB0s + MK)^2,
+    Description   -> "t+ factor"
+  },
+
+  t0B0sK == {
+    ParameterType -> Internal,
+    Value         -> (MB0s + MK)*(Sqrt[MK]-Sqrt[MB0s])^2,
+    Description   -> "t0 factor"
+  },
+
+  zB0sK == {
+    ParameterType -> Internal,
+    Indices       -> {Index[Neutrinos], Index[Generation]},
+    Value         -> {zB0sK[ii_,ll_] -> (Sqrt[tplusB0sK-avq2B0sK[ii,ll]]-Sqrt[tplusB0sK-t0B0sK])/(Sqrt[tplusB0sK-avq2B0sK[ii,ll]]+Sqrt[tplusB0sK-t0B0sK])},
+    Description   -> "z factor"
+  },
+
+  z0B0sK == {
+    ParameterType -> Internal,
+    Value         -> (Sqrt[tplusB0sK]-Sqrt[tplusB0sK-t0B0sK])/(Sqrt[tplusB0sK]+Sqrt[tplusB0sK-t0B0sK]),
+    Description   -> "z0 factor"
+  },
+
+  fplusB0sK == {
+    ParameterType -> Internal,
+    Indices       -> {Index[Neutrinos], Index[Generation]},
+    Value         -> {fplusB0sK[ii_,ll_] -> (1/(1-avq2B0sK[ii,ll]/MBstar^2))*(-0.672*(zB0sK[ii,ll]+1/4*zB0sK[ii,ll]^4) + 0.07*(zB0sK[ii,ll]^2 - 1/2*zB0sK[ii,ll]^4) + 1.34*(3/4*zB0sK[ii,ll]^4 + zB0sK[ii,ll]^3) + 0.374)},
+    Description   -> "Average f+ form factor in B0s to K+ decays"
+  },
+
+  f0B0sK == { 
+    ParameterType -> Internal,
+    Indices     -> {Index[Neutrinos], Index[Generation]},
+    Value         -> {f0B0sK[ii_,ll_] -> (14.0162*zB0sK[ii,ll]^3 + 0.24*zB0sK[ii,ll]^2 + 0.089*zB0sK[ii,ll] + 0.2203)},
+    Description   -> "Average f0 form factor in B0s to K+ decays"
+  },
+
+  fminusB0sK == {
+    ParameterType -> Internal,
+    Indices       -> {Index[Neutrinos], Index[Generation]},
+    Value         -> {fminusB0sK[ii_,ll_] -> (MK^2-MB0s^2)/avq2B0sK[ii,ll]*(f0B0sK[ii,ll]-fplusB0sK[ii,ll])},
+    Description   -> "Average f- form factor in B0s to K+ decays"
+  },
+
+  yl == {
+    ParameterType    -> Internal,
+    Indices          -> {Index[Generation], Index[Generation]},
+    Definitions      -> {yl[i_?NumericQ, j_?NumericQ] :> 0  /; (i =!= j)},
+    Value            -> {yl[1,1] -> Sqrt[2] yme /vev, yl[2,2] -> Sqrt[2] ymm /vev, yl[3,3] -> Sqrt[2] ymtau /vev},
+    InteractionOrder -> {QED, 1},
+    ParameterName    -> {yl[1,1] -> ye, yl[2,2] -> ym, yl[3,3] -> ytau},
+    TeX              -> Superscript[y, l],
+    Description      -> "Lepton Yukawa couplings"
+  },
+  yu == {
+    ParameterType    -> Internal,
+    Indices          -> {Index[Generation], Index[Generation]},
+    Definitions      -> {yu[i_?NumericQ, j_?NumericQ] :> 0  /; (i =!= j)},
+    Value            -> {yu[1,1] -> Sqrt[2] ymup/vev, yu[2,2] -> Sqrt[2] ymc/vev, yu[3,3] -> Sqrt[2] ymt/vev},
+    InteractionOrder -> {QED, 1},
+    ParameterName    -> {yu[1,1] -> yup, yu[2,2] -> yc, yu[3,3] -> yt},
+    TeX              -> Superscript[y, u],
+    Description      -> "Up-type Yukawa couplings"
+  },
+  yd == {
+    ParameterType    -> Internal,
+    Indices          -> {Index[Generation], Index[Generation]},
+    Definitions      -> {yd[i_?NumericQ, j_?NumericQ] :> 0  /; (i =!= j)},
+    Value            -> {yd[1,1] -> Sqrt[2] ymdo/vev, yd[2,2] -> Sqrt[2] yms/vev, yd[3,3] -> Sqrt[2] ymb/vev},
+    InteractionOrder -> {QED, 1},
+    ParameterName    -> {yd[1,1] -> ydo, yd[2,2] -> ys, yd[3,3] -> yb},
+    TeX              -> Superscript[y, d],
+    Description      -> "Down-type Yukawa couplings"
+  },
+
+  CKM == { 
+    ParameterType -> Internal,
+    Indices       -> {Index[Generation], Index[Generation]},
+    Unitary       -> True,
+    Value         -> {CKM[1,1] ->                                               Cos[cabi] Cos[th13], CKM[1,2] ->                                               Sin[cabi] Cos[th13], CKM[1,3] -> Sin[th13] Exp[-I del13],
+                      CKM[2,1] -> -Sin[cabi] Cos[th23] - Cos[cabi] Sin[th23] Sin[th13] Exp[I del13], CKM[2,2] ->  Cos[cabi] Cos[th23] - Sin[cabi] Sin[th23] Sin[th13] Exp[I del13], CKM[2,3] -> Sin[th23] Cos[th13],
+                      CKM[3,1] ->  Sin[cabi] Sin[th23] - Cos[cabi] Cos[th23] Sin[th13] Exp[I del13], CKM[3,2] -> -Cos[cabi] Sin[th23] - Sin[cabi] Cos[th23] Sin[th13] Exp[I del13], CKM[3,3] -> Cos[th23] Cos[th13]},
+    TeX         -> Superscript[V,CKM],
+    Description -> "CKM-Matrix"},
+
+  HEAV == { 
+    ParameterType -> Internal,
+    Indices       -> {Index[Heavynus],Index[Neutrinos]},
+    Value         -> {HEAV[1,1] -> -Conjugate[thetae]/r,  
+                      HEAV[1,2] -> -Conjugate[thetamu]/r, 
+                      HEAV[1,3] -> -Conjugate[thetatau]/r, 
+                      HEAV[1,4] -> 1/r},
+    TeX           -> Superscript[UL,n],
+    ComplexParameter -> True,
+    Description   -> "Mass eigenstate component of right-handed nu"},
+
+ HEAVR == { 
+    ParameterType -> Internal,
+    Indices       -> {Index[Heavynus],Index[Neutrinos]},
+    Value         -> {HEAVR[1,1] -> 0,  
+                      HEAVR[1,2] -> 0, 
+                      HEAVR[1,3] -> 0, 
+                      HEAVR[1,4] -> 1},
+    TeX           -> Superscript[UR,n],
+    ComplexParameter -> True,
+    Description   -> "Mass eigenstate component of right-handed nu"},
+
+
+  PMNS == { 
+    ParameterType -> Internal,
+    Indices       -> {Index[Generation], Index[Neutrinos]},
+    Unitary       -> False,
+    Value         -> {PMNS[1,1] -> If[thetae == 0 && thetamu == 0 && thetatau == 0, 1, 1-thetae*Conjugate[thetae]*(r-1)/r/thetatot^2],
+                     PMNS[1,2] ->  If[thetae == 0 && thetamu == 0 && thetatau == 0, 0, -thetae*Conjugate[thetamu]*(r-1)/r/thetatot^2],
+                     PMNS[1,3] ->  If[thetae == 0 && thetamu == 0 && thetatau == 0, 0, -thetae*Conjugate[thetatau]*(r-1)/r/thetatot^2],
+                     PMNS[1,4] ->  If[thetae == 0 && thetamu == 0 && thetatau == 0, 0, thetae/r],
+                     PMNS[2,1] ->  If[thetae == 0 && thetamu == 0 && thetatau == 0, 0, -Conjugate[thetae]*thetamu*(r-1)/r/thetatot^2],
+                     PMNS[2,2] ->  If[thetae == 0 && thetamu == 0 && thetatau == 0, 1, 1-thetamu*Conjugate[thetamu]*(r-1)/r/thetatot^2],
+                     PMNS[2,3] ->  If[thetae == 0 && thetamu == 0 && thetatau == 0, 0, -thetamu*Conjugate[thetatau]*(r-1)/r/thetatot^2],
+                     PMNS[2,4] ->  If[thetae == 0 && thetamu == 0 && thetatau == 0, 0, thetamu/r],
+                     PMNS[3,1] ->  If[thetae == 0 && thetamu == 0 && thetatau == 0, 0, -Conjugate[thetae]*thetatau*(r-1)/r/thetatot^2],
+                     PMNS[3,2] ->  If[thetae == 0 && thetamu == 0 && thetatau == 0, 0, -Conjugate[thetamu]*thetatau*(r-1)/r/thetatot^2],
+                     PMNS[3,3] ->  If[thetae == 0 && thetamu == 0 && thetatau == 0, 1, 1-thetatau*Conjugate[thetatau]*(r-1)/r/thetatot^2],
+                     PMNS[3,4] ->  If[thetae == 0 && thetamu == 0 && thetatau == 0, 0, thetatau/r]},
+    TeX           -> Superscript[U,PMNS],
+    TeX           -> Superscript[U,PMNS],
+    ComplexParameter -> True,
+    Description   -> "PMNS-Matrix"}
+};
+
+
+
+(* ************************** *)
+(* *****   Lagrangian   ***** *)
+(* For consistency we do not  *)
+(*  add quarks with mesons    *)
+(* ************************** *)
+
+LGauge := Block[{mu,nu,ii,aa}, 
+  ExpandIndices[-1/4 FS[B,mu,nu] FS[B,mu,nu] - 1/4 FS[Wi,mu,nu,ii] FS[Wi,mu,nu,ii] - 1/4 FS[G,mu,nu,aa] FS[G,mu,nu,aa], FlavorExpand->SU2W]];
+
+LQuarks := Block[{mu}, 
+  ExpandIndices[I*(
+    QLbar.Ga[mu].DC[QL, mu]  + uRbar.Ga[mu].DC[uR, mu] + dRbar.Ga[mu].DC[dR, mu]), 
+  FlavorExpand->{SU2W,SU2D}]/.{CKM[a_,b_] Conjugate[CKM[a_,c_]]->IndexDelta[b,c], CKM[b_,a_] Conjugate[CKM[c_,a_]]->IndexDelta[b,c], PMNS[b_,a_] Conjugate[PMNS[c_,a_]]->IndexDelta[b,c], HEAV[b_,a_] Conjugate[HEAV[c_,a_]]->IndexDelta[b,c], PMNS[a_,b_] Conjugate[PMNS[a_,c_]] ->IndexDelta[b,c] - HEAV[1,b] Conjugate[HEAV[1,c]]}];
+
+LFermions := Block[{mu}, 
+  ExpandIndices[I*(
+    LLbar.Ga[mu].DC[LL, mu] + lRbar.Ga[mu].DC[lR, mu] + NLbar.Ga[mu].DC[NL, mu] + NRbar.Ga[mu].DC[NR, mu] ), 
+  FlavorExpand->{SU2W,SU2D}]/.{CKM[a_,b_] Conjugate[CKM[a_,c_]]->IndexDelta[b,c], CKM[b_,a_] Conjugate[CKM[c_,a_]]->IndexDelta[b,c], PMNS[b_,a_] Conjugate[PMNS[c_,a_]]->IndexDelta[b,c], HEAV[b_,a_] Conjugate[HEAV[c_,a_]]->IndexDelta[b,c], PMNS[a_,b_] Conjugate[PMNS[a_,c_]] ->IndexDelta[b,c] - HEAV[1,b] Conjugate[HEAV[1,c]]}];
+
+LHiggs := Block[{ii,mu, feynmangaugerules},
+  feynmangaugerules = If[Not[FeynmanGauge], {G0|GP|GPbar ->0}, {}];
+  ExpandIndices[DC[Phibar[ii],mu] DC[Phi[ii],mu] + muH^2 Phibar[ii] Phi[ii] - lam Phibar[ii] Phi[ii] Phibar[jj] Phi[jj], FlavorExpand->{SU2D,SU2W}]/.feynmangaugerules
+ ];
+
+LYukawa := Block[{sp,ii,jj,cc,ff1,ff2,ff3,yuk,feynmangaugerules},
+  feynmangaugerules = If[Not[FeynmanGauge], {G0|GP|GPbar ->0}, {}];
+ 
+  yuk = ExpandIndices[
+   -yd[ff2, ff3] CKM[ff1, ff2] QLbar[sp, ii, ff1, cc].dR [sp, ff3, cc] Phi[ii] - 
+    yl[ff1, ff3] LLbar[sp, ii, ff1].lR[sp, ff3] Phi[ii] - 
+    yu[ff1, ff2] QLbar[sp, ii, ff1, cc].uR [sp, ff2, cc] Phibar[jj] Eps[ii, jj] - yN[ff1, ff2] LLbar[sp, ii, ff1].NR[sp, ff2] Phibar[jj] Eps[ii, jj] - MN4 NLbar[sp,ff1].NR[sp,ff1] , FlavorExpand -> SU2D];
+  yuk = yuk /. { CKM[a_, b_] Conjugate[CKM[a_, c_]] -> IndexDelta[b, c], CKM[b_, a_] Conjugate[CKM[c_, a_]] -> IndexDelta[b, c], PMNS[b_,a_] Conjugate[PMNS[c_,a_]]->IndexDelta[b,c], HEAV[b_,a_] Conjugate[HEAV[c_,a_]]->IndexDelta[b,c], PMNS[a_,b_] Conjugate[PMNS[a_,c_]] ->IndexDelta[b,c] - HEAV[1,b] Conjugate[HEAV[1,c]]};
+  yuk+HC[yuk]/.feynmangaugerules
+ ];
+
+LGhost := Block[{LGh1,LGhw,LGhs,LGhphi,mu, generators,gh,ghbar,Vectorize,phi1,phi2,togoldstones,doublet,doublet0},
+  (* Pure gauge piece *) 	
+  LGh1 = -ghBbar.del[DC[ghB,mu],mu];
+  LGhw = -ghWibar[ii].del[DC[ghWi[ii],mu],mu];
+  LGhs = -ghGbar[ii].del[DC[ghG[ii],mu],mu];
+
+(***********************************)
+(***     Meson interactions      ***) 
+(***********************************)
+
+(*LHadr := Block[{mu,nu,ii,jj,kk,ff1,ff2,ff3,ff4,ff5,yhad},*)
+LHadr := Block[{mu,nu,ii,jj,kk,ff1,ff2,ff3,yhad},
+ yhad = ExpandIndices[
+
+(*** Charged pseudoscalars ***)
+
+(*K*)
+
+1/2 DC[Kbar,mu] DC[K,mu] - MK^2/2 Kbar K 
++ Sum[I*Sqrt[2]*Gf*fK*CKM[1,2] Kbar PMNS[ff2,ff1] yl[ff2,ff2] vev/Sqrt[2] lbar[ii, ff2].ProjM[ii,jj].vl[jj, ff1],{ff1,1,4},{ff2,1,3}] 
+- Sum[I*Sqrt[2]*Gf*fK*CKM[1,2] Kbar PMNS[ff2,ff1] numass[ff1,ff1] lbar[ii, ff2].ProjP[ii,jj].vl[jj, ff1],{ff1,4,4},{ff2,1,3}]
+
+(* Pi *)
+
++ 1/2 DC[Pipbar,mu] DC[Pip,mu] - MPip^2/2 Pipbar Pip 
++ Sum[I*Sqrt[2]*Gf*fpi*CKM[1,1] Pipbar PMNS[ff2,ff1] yl[ff2,ff2] vev/Sqrt[2] lbar[ii, ff2].ProjM[ii,jj].vl[jj, ff1] ,{ff1,1,4},{ff2,1,3}]
+- Sum[I*Sqrt[2]*Gf*fpi*CKM[1,1] Pipbar PMNS[ff2,ff1] numass[ff1,ff1] lbar[ii, ff2].ProjP[ii,jj].vl[jj, ff1] ,{ff1,4,4},{ff2,1,3}]
+
+(*D*)
+
++ 1/2 DC[Ddbar,mu] DC[Dd,mu] - MDd^2/2 Ddbar Dd 
++ Sum[I*Sqrt[2]*Gf*fD*CKM[2,1] Ddbar PMNS[ff2,ff1] yl[ff2,ff2] vev/Sqrt[2] lbar[ii, ff2].ProjM[ii,jj].vl[jj, ff1] ,{ff1,1,4},{ff2,1,3}]
+- Sum[I*Sqrt[2]*Gf*fD*CKM[2,1] Ddbar PMNS[ff2,ff1] numass[ff1,ff1] lbar[ii, ff2].ProjP[ii,jj].vl[jj, ff1] ,{ff1,4,4},{ff2,1,3}]
+
+(*Ds*)
+
++ 1/2 DC[Dsbar,mu] DC[Ds,mu] - MDs^2/2 Dsbar Ds 
++ Sum[I*Sqrt[2]*Gf*fDs*CKM[2,2] Dsbar PMNS[ff2,ff1] yl[ff2,ff2] vev/Sqrt[2] lbar[ii, ff2].ProjM[ii,jj].vl[jj, ff1] ,{ff1,1,4},{ff2,1,3}]
+- Sum[I*Sqrt[2]*Gf*fDs*CKM[2,2] Dsbar PMNS[ff2,ff1] numass[ff1,ff1] lbar[ii, ff2].ProjP[ii,jj].vl[jj, ff1] ,{ff1,4,4},{ff2,1,3}]
+
+(*B*)
+
++ 1/2 DC[Bubar,mu] DC[Bu,mu] - MBu^2/2 Bubar Bu 
++ Sum[I*Sqrt[2]*Gf*fB*CKM[1,3] Bubar PMNS[ff2,ff1] yl[ff2,ff2] vev/Sqrt[2] lbar[ii, ff2].ProjM[ii,jj].vl[jj, ff1] ,{ff1,1,4},{ff2,1,3}]
+- Sum[I*Sqrt[2]*Gf*fB*CKM[1,3] Bubar PMNS[ff2,ff1] numass[ff1,ff1] lbar[ii, ff2].ProjP[ii,jj].vl[jj, ff1] ,{ff1,4,4},{ff2,1,3}]
+
+(*Bc*)
+
++ 1/2 DC[Bcbar,mu] DC[Bc,mu] - MBc^2/2 Bcbar Bc 
++ Sum[I*Sqrt[2]*Gf*fBc*CKM[2,3] Bcbar PMNS[ff2,ff1] yl[ff2,ff2] vev/Sqrt[2] lbar[ii, ff2].ProjM[ii,jj].vl[jj, ff1] ,{ff1,1,4},{ff2,1,3}]
+- Sum[I*Sqrt[2]*Gf*fBc*CKM[2,3] Bcbar PMNS[ff2,ff1] numass[ff1,ff1] lbar[ii, ff2].ProjP[ii,jj].vl[jj, ff1] ,{ff1,4,4},{ff2,1,3}]
+
+(*** Neutral pseudoscalars ***)
+
+(* pi0 *)
+
+- Sum[I/2*Gf*fpi Pi0 Conjugate[PMNS[ff3,ff1]]PMNS[ff3,ff2] numass[ff2,ff2] vlbar[ii, ff1].ProjP[ii,jj].vl[jj, ff2] ,{ff1,1,4},{ff2,4,4},{ff3,1,3}]
++ 1/4 DC[Pi0,mu] DC[Pi0,mu] - MPi0^2/4 Pi0 Pi0
++ Sum[I/2*Gf*fpi Pi0 Conjugate[PMNS[ff3,ff1]] PMNS[ff3,ff2] numass[ff1,ff1] vlbar[ii, ff1].ProjM[ii,jj].vl[jj, ff2] ,{ff1,4,4},{ff2,1,4},{ff3,1,3}]
+
+(* eta *)
+
++ 1/4 DC[Etabar,mu] DC[Eta,mu] - Meta^2/4 Eta Eta 
+- Sum[I/2*Gf*feta Eta Conjugate[PMNS[ff3,ff1]]PMNS[ff3,ff2] numass[ff2,ff2] vlbar[ii, ff1].ProjP[ii,jj].vl[jj, ff2] ,{ff1,1,4},{ff2,4,4},{ff3,1,3}]
++ Sum[I/2*Gf*feta Eta Conjugate[PMNS[ff3,ff1]]PMNS[ff3,ff2] numass[ff1,ff1] vlbar[ii, ff1].ProjM[ii,jj].vl[jj, ff2] ,{ff1,4,4},{ff2,1,4},{ff3,1,3}]
+
+(* eta^' *)
+
++ 1/4 DC[Etapbar,mu] DC[Etap,mu] - Metap^2/4 Etap Etap 
+- Sum[I/2*Gf*fetap Etap Conjugate[PMNS[ff3,ff1]]PMNS[ff3,ff2] numass[ff2,ff2] vlbar[ii, ff1].ProjP[ii,jj].vl[jj, ff2] ,{ff1,1,4},{ff2,4,4},{ff3,1,3}]
++ Sum[I/2*Gf*fetap Etap Conjugate[PMNS[ff3,ff1]]PMNS[ff3,ff2] numass[ff1,ff1] vlbar[ii, ff1].ProjM[ii,jj].vl[jj, ff2] ,{ff1,4,4},{ff2,1,4},{ff3,1,3}]
+
+(*** Neutral vector mesons ***) 
+
+(* rho0 *)
+
+-1/8 FS[rho0,mu,nu] FS[rho0,mu,nu] + Mrho0^2/4 rho0[mu] rho0[mu] 
+- Sum[1/2*Gf*frho*(1-2*sw^2) rho0[mu] Conjugate[PMNS[ff3,ff1]]PMNS[ff3,ff2] vlbar[ii, ff1].Ga[mu,ii,jj].ProjM[jj,kk].vl[kk, ff2] ,{ff1,1,4},{ff2,1,4},{ff3,1,3}]
+
+(* omega *)
+
+-1/8 FS[omega,mu,nu] FS[omega,mu,nu] + Mom^2/4 omega[mu] omega[mu] 
++ Sum[1/2*Gf*fomega*(2/3*sw^2) omega[mu] Conjugate[PMNS[ff3,ff1]]PMNS[ff3,ff2] vlbar[ii,ff1].Ga[mu,ii,jj].ProjM[jj,kk].vl[kk,ff2] ,{ff1,1,4},{ff2,1,4},{ff3,1,3}]
+
+(* phi *)
+
+-1/8 FS[phimeson,mu,nu] FS[phimeson,mu,nu] + Mphi^2/4 phimeson[mu] phimeson[mu] 
++ Sum[1/2*Sqrt[2]*Gf*fphi*(1/2 - 2/3*sw^2) phimeson[mu] Conjugate[PMNS[ff3,ff1]]PMNS[ff3,ff2] vlbar[ii,ff1].Ga[mu,ii,jj].ProjM[jj,kk].vl[kk,ff2] ,{ff1,1,4},{ff2,1,4},{ff3,1,3}]
+
+(*** Charged vector mesons ***) 
+
+(* Rho *)
+
+-1/4 FS[rhobar,mu,nu] FS[rho,mu,nu]  + Mrho^2/2 rhobar[mu] rho[mu] 
+- Sum[Sqrt[2]*Gf*frho*CKM[1,1] PMNS[ff2,ff1] lbar[ii, ff2].Ga[mu,ii,jj].ProjM[jj,kk].vl[kk,ff1] rhobar[mu] ,{ff1,1,4},{ff2,1,3}]
+
+(* Kstar *)
+
+-1/4 FS[Kstarbar,mu,nu] FS[Kstar,mu,nu]  + MKstar^2/2 Kstarbar[mu] Kstar[mu] 
+- Sum[Sqrt[2]*Gf*fKstar*CKM[1,2] PMNS[ff2,ff1] lbar[ii, ff2].Ga[mu,ii,jj].ProjM[jj,kk].vl[kk,ff1] Kstarbar[mu] ,{ff1,1,4},{ff2,1,3}]
+
+(*** Semileptonic decays: ***)
+
+(* K -> pi0 l nu and K0 -> pip l nu *)
+
++ 1/2 DC[K0bar,mu] DC[K0,mu] - MK0^2/2 K0bar K0 
+
+-Sum[2*Sqrt[2]*Gf*CKM[1,2]*fplusK0Pi[ff1,ff2]*I del[Pipbar,mu] K0bar PMNS[ff2,ff1] lbar[ii,ff2].Ga[mu,ii,jj].ProjM[jj,kk].vl[kk,ff1],{ff1,1,4},{ff2,1,2}]
++Sum[Sqrt[2]*Gf*CKM[1,2]*(fplusK0Pi[ff1,ff2] - fminusK0Pi[ff1,ff2])*vev/Sqrt[2] Pipbar K0bar PMNS[ff2,ff1] yl[ff2,ff2] lbar[ii,ff2].ProjM[ii,jj].vl[jj,ff1],{ff1,1,4},{ff2,1,2}]
+-Sum[Sqrt[2]*Gf*CKM[1,2]*(fplusK0Pi[ff1,ff2] - fminusK0Pi[ff1,ff2]) Pipbar K0bar PMNS[ff2,ff1] numass[ff1,ff1] lbar[ii,ff2].ProjP[ii,jj].vl[jj,ff1] ,{ff1,4,4},{ff2,1,2}]
+ 
+-Sum[2*Gf*CKM[1,2]*fplusKPi0[ff1,ff2]*I del[Pi0,mu] Kbar PMNS[ff2,ff1] lbar[ii,ff2].Ga[mu,ii,jj].ProjM[jj,kk].vl[kk,ff1],{ff1,1,4},{ff2,1,2}]
++Sum[Gf*CKM[1,2]*(fplusKPi0[ff1,ff2] - fminusKPi0[ff1,ff2])*vev/Sqrt[2] Pi0 Kbar PMNS[ff2,ff1] yl[ff2,ff2] lbar[ii,ff2].ProjM[ii,jj].vl[jj,ff1],{ff1,1,4},{ff2,1,2}]
+-Sum[Gf*CKM[1,2]*(fplusKPi0[ff1,ff2] - fminusKPi0[ff1,ff2]) Pi0 Kbar PMNS[ff2,ff1] numass[ff1,ff1] lbar[ii,ff2].ProjP[ii,jj].vl[jj,ff1],{ff1,4,4},{ff2,1,2}]
+
+(* D -> K0 l nu and D0 -> K l nu *) 
+
++ 1/2 DC[D0bar,mu] DC[D0,mu] - MD0^2/2 D0bar D0 
+
+-Sum[2*Sqrt[2]*Gf*CKM[2,2]*fplusDK[ff1,ff2]*I del[Kbar,mu] D0bar PMNS[ff2,ff1] lbar[ii,ff2].Ga[mu,ii,jj].ProjM[jj,kk].vl[kk,ff1],{ff1,1,4},{ff2,1,2}]
++Sum[Sqrt[2]*Gf*CKM[2,2]*(fplusDK[ff1,ff2] - fminusDK[ff1,ff2])*vev/Sqrt[2] Kbar D0bar PMNS[ff2,ff1] yl[ff2,ff2] lbar[ii,ff2].ProjM[ii,jj].vl[jj,ff1],{ff1,1,4},{ff2,1,2}]
+-Sum[Sqrt[2]*Gf*CKM[2,2]*(fplusDK[ff1,ff2] - fminusDK[ff1,ff2]) Kbar D0bar PMNS[ff2,ff1] numass[ff1,ff1] lbar[ii,ff2].ProjP[ii,jj].vl[jj,ff1],{ff1,4,4},{ff2,1,2}]
+
+-Sum[2*Sqrt[2]*Gf*CKM[2,2]*fplusDK[ff1,ff2]*I del[K0bar,mu] Ddbar PMNS[ff2,ff1] lbar[ii,ff2].Ga[mu,ii,jj].ProjM[jj,kk].vl[kk,ff1],{ff1,1,4},{ff2,1,2}]
++Sum[Sqrt[2]*Gf*CKM[2,2]*(fplusDK[ff1,ff2]-fminusDK[ff1,ff2])*vev/Sqrt[2] K0bar Ddbar PMNS[ff2,ff1] yl[ff2,ff2] lbar[ii,ff2].ProjM[ii,jj].vl[jj,ff1],{ff1,1,4},{ff2,1,2}]
+-Sum[Sqrt[2]*Gf*CKM[2,2]*(fplusDK[ff1,ff2]-fminusDK[ff1,ff2]) K0bar Ddbar PMNS[ff2,ff1] numass[ff1,ff1] lbar[ii,ff2].ProjP[ii,jj].vl[jj,ff1],{ff1,4,4},{ff2,1,2}]
+
+(* B+ -> pi0 l nu and B0 -> pi+ l nu *)
+
++ 1/2 DC[B0bar,mu] DC[B0,mu] - MB0^2/2 B0bar B0 
+
+-Sum[2*Gf*CKM[1,3]*fplusBPi0[ff1,ff2]*I del[Pi0,mu] Bubar PMNS[ff2,ff1] lbar[ii,ff2].Ga[mu,ii,jj].ProjM[jj,kk].vl[kk,ff1] ,{ff1,1,4},{ff2,1,3}]
++Sum[Gf*CKM[1,3]*(fplusBPi0[ff1,ff2] - fminusBPi0[ff1,ff2])*vev/Sqrt[2] Pi0 Bubar PMNS[ff2,ff1] yl[ff2,ff2] lbar[ii,ff2].ProjM[ii,jj].vl[jj,ff1] ,{ff1,1,4},{ff2,1,3}]
+-Sum[Gf*CKM[1,3]*(fplusBPi0[ff1,ff2] - fminusBPi0[ff1,ff2]) Pi0 Bubar PMNS[ff2,ff1] numass[ff1,ff1] lbar[ii,ff2].ProjP[ii,jj].vl[jj,ff1] ,{ff1,4,4},{ff2,1,3}]
+
+-Sum[2*Sqrt[2]*Gf*CKM[1,3]*fplusB0Pi[ff1,ff2]*I del[Pipbar,mu] B0bar PMNS[ff2,ff1] lbar[ii,ff2].Ga[mu,ii,jj].ProjM[jj,kk].vl[kk,ff1] ,{ff1,1,4},{ff2,1,3}]
++Sum[Sqrt[2]*Gf*CKM[1,3]*(fplusB0Pi[ff1,ff2] - fminusB0Pi[ff1,ff2])*vev/Sqrt[2] Pipbar B0bar PMNS[ff2,ff1] yl[ff2,ff2] lbar[ii,ff2].ProjM[ii,jj].vl[jj,ff1] ,{ff1,1,4},{ff2,1,3}]
+-Sum[Sqrt[2]*Gf*CKM[1,3]*(fplusB0Pi[ff1,ff2] - fminusB0Pi[ff1,ff2]) Pipbar B0bar PMNS[ff2,ff1] numass[ff1,ff1] lbar[ii,ff2].ProjP[ii,jj].vl[jj,ff1] ,{ff1,4,4},{ff2,1,3}]
+
+(* B+ -> D0 l nu, B0 -> D+ l nu and B0s -> Ds+ l nu *) 
+
+-Sum[2*Sqrt[2]*Gf*CKM[2,3]*fplusBD0[ff1,ff2]*I del[D0bar,mu] Bubar PMNS[ff2,ff1] lbar[ii,ff2].Ga[mu,ii,jj].ProjM[jj,kk].vl[kk,ff1] ,{ff1,1,4},{ff2,1,3}]
++Sum[Sqrt[2]*Gf*CKM[2,3]*(fplusBD0[ff1,ff2]-fminusBD0[ff1,ff2])*vev/Sqrt[2] D0bar Bubar PMNS[ff2,ff1] yl[ff2,ff2] lbar[ii,ff2].ProjM[ii,jj].vl[jj,ff1] ,{ff1,1,4},{ff2,1,3}]
+-Sum[Sqrt[2]*Gf*CKM[2,3]*(fplusBD0[ff1,ff2]-fminusBD0[ff1,ff2]) D0bar Bubar PMNS[ff2,ff1] numass[ff1,ff1] lbar[ii,ff2].ProjP[ii,jj].vl[jj,ff1] ,{ff1,4,4},{ff2,1,3}]
+
+-Sum[2*Sqrt[2]*Gf*CKM[2,3]fplusB0D[ff1,ff2]*I del[Ddbar,mu] B0bar PMNS[ff2,ff1] lbar[ii,ff2].Ga[mu,ii,jj].ProjM[jj,kk].vl[kk,ff1] ,{ff1,1,4},{ff2,1,3}]
++Sum[Sqrt[2]*Gf*CKM[2,3]*(fplusB0D[ff1,ff2] - fminusB0D[ff1,ff2])*vev/Sqrt[2] Ddbar B0bar PMNS[ff2,ff1] yl[ff2,ff2] lbar[ii,ff2].ProjM[ii,jj].vl[jj,ff1] ,{ff1,1,4},{ff2,1,3}]
+-Sum[Sqrt[2]*Gf*CKM[2,3]*(fplusB0D[ff1,ff2] - fminusB0D[ff1,ff2]) Ddbar B0bar PMNS[ff2,ff1] numass[ff1,ff1] lbar[ii,ff2].ProjP[ii,jj].vl[jj,ff1] ,{ff1,4,4},{ff2,1,3}]
+
++ 1/2 DC[B0sbar,mu] DC[B0s,mu] - MB0s^2/2 B0sbar B0s
+
+-Sum[2*Sqrt[2]*Gf*CKM[2,3]*fplusB0sDs[ff1,ff2]*I del[Dsbar,mu] B0sbar PMNS[ff2,ff1] lbar[ii,ff2].Ga[mu,ii,jj].ProjM[jj,kk].vl[kk,ff1] ,{ff1,1,4},{ff2,1,3}]
++Sum[Sqrt[2]*Gf*CKM[2,3]*(fplusB0sDs[ff1,ff2] - fminusB0sDs[ff1,ff2])*vev/Sqrt[2] Dsbar B0sbar PMNS[ff2,ff1] yl[ff2,ff2] lbar[ii,ff2].ProjM[ii,jj].vl[jj,ff1] ,{ff1,1,4},{ff2,1,3}]
+-Sum[Sqrt[2]*Gf*CKM[2,3]*(fplusB0sDs[ff1,ff2] - fminusB0sDs[ff1,ff2]) Dsbar B0sbar PMNS[ff2,ff1] numass[ff1,ff1] lbar[ii,ff2].ProjP[ii,jj].vl[jj,ff1] ,{ff1,4,4},{ff2,1,3}]
+
+(* B0s -> K+ l nu *)
+
+-Sum[2*Sqrt[2]*Gf*CKM[1,3]*fplusB0sK[ff1,ff2]*I del[Kbar,mu] B0sbar PMNS[ff2,ff1] lbar[ii,ff2].Ga[mu,ii,jj].ProjM[jj,kk].vl[kk,ff1] ,{ff1,1,4},{ff2,1,3}]
++Sum[Sqrt[2]*Gf*CKM[1,3]*(fplusB0sK[ff1,ff2] - fminusB0sK[ff1,ff2])*vev/Sqrt[2] Kbar B0sbar PMNS[ff2,ff1] yl[ff2,ff2] lbar[ii,ff2].ProjM[ii,jj].vl[jj,ff1] ,{ff1,1,4},{ff2,1,3}]
+-Sum[Sqrt[2]*Gf*CKM[1,3]*(fplusB0sK[ff1,ff2] - fminusB0sK[ff1,ff2]) Kbar B0sbar PMNS[ff2,ff1] numass[ff1,ff1] lbar[ii,ff2].ProjP[ii,jj].vl[jj,ff1] ,{ff1,4,4},{ff2,1,3}]
+
+
+
+, FlavorExpand->{SU2D,SU2W}];
+yhad+HC[yhad]
+ ];
+
+
+  (* Scalar pieces: see Peskin pages 739-742 *)
+  (* phi1 and phi2 are the real degrees of freedom of GP *)
+  (* Vectorize transforms a doublet in a vector in the phi-basis, i.e. the basis of real degrees of freedom *)
+  gh    = {ghB, ghWi[1], ghWi[2], ghWi[3]};
+  ghbar = {ghBbar, ghWibar[1], ghWibar[2], ghWibar[3]};
+  generators = {-I/2 g1 IdentityMatrix[2], -I/2 gw PauliSigma[1], -I/2 gw PauliSigma[2], -I/2 gw PauliSigma[3]};
+  doublet = Expand[{(-I phi1 - phi2)/Sqrt[2], Phi[2]} /. MR$Definitions /. vev -> 0]; 
+  doublet0 = {0, vev/Sqrt[2]};
+  Vectorize[{a_, b_}]:= Simplify[{Sqrt[2] Re[Expand[a]], Sqrt[2] Im[Expand[a]], Sqrt[2] Re[Expand[b]], Sqrt[2] Im[Expand[b]]}/.{Im[_]->0, Re[num_]->num}];
+  togoldstones := {phi1 -> (GP + GPbar)/Sqrt[2], phi2 -> (-GP + GPbar)/(I Sqrt[2])};
+  LGhphi=Plus@@Flatten[Table[-ghbar[[kkk]].gh[[lll]] Vectorize[generators[[kkk]].doublet0].Vectorize[generators[[lll]].(doublet+doublet0)],{kkk,4},{lll,4}]] /.togoldstones;
+
+ExpandIndices[ LGhs + If[FeynmanGauge, LGh1 + LGhw + LGhphi,0], FlavorExpand->SU2W]];
+
+LagHeavyN:= LGauge + LFermions + LHiggs + LYukawa + LGhost + If[Mesons,LHadr,LQuarks];
