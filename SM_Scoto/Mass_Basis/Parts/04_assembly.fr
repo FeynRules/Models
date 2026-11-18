@@ -1,0 +1,6 @@
+(* ==================================================================
+   04_assembly.fr
+   ================================================================== *)
+
+LBSMScotogenic := LInert + LMajorana + LScotYuk;
+LScotogenic    := LSM + LBSMScotogenic;
