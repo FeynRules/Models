@@ -1,0 +1,37 @@
+name: Update maddm_models submodule
+
+# Keep the maddm_models submodule pointing to the latest commit of the
+# main branch of maddmhep/maddm_models.
+on:
+  schedule:
+    - cron: '0 3 * * *'  # every day at 03:00 UTC
+  workflow_dispatch:     # manual trigger from the Actions tab
+  repository_dispatch:   # can be triggered by maddmhep/maddm_models
+    types: [update-maddm-models]
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Update submodule to latest main
+        run: |
+          git submodule update --init --remote maddm_models
+          git submodule status maddm_models
+
+      - name: Commit and push if changed
+        run: |
+          if git diff --quiet -- maddm_models; then
+            echo "maddm_models already up to date"
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add maddm_models
+          git commit -m "Update maddm_models submodule to latest main"
+          git push

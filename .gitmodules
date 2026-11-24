@@ -7,3 +7,7 @@
 [submodule "vSMEFT"]
 	path = vSMEFT
 	url = https://github.com/arsenii-titov/vSMEFT.git
+[submodule "maddm_models"]
+	path = maddm_models
+	url = https://github.com/maddmhep/maddm_models.git
+	branch = main
